@@ -15,13 +15,12 @@
 
     <!-- Menú Lateral Izquierdo -->
     <aside class="w-64 bg-white dark:bg-barber-dark border-r border-slate-200 dark:border-slate-700/50 flex flex-col hidden md:flex fixed h-full z-20 transition-colors duration-300">
-        <div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700/50">
-            <a href="{{ route('app.dashboard') }}" class="flex items-center">
+        <!-- Contenedor del Logo (Centrado) -->
+        <div class="h-20 flex items-center justify-center px-4 border-b border-slate-200 dark:border-slate-700/50">
+            <a href="{{ route('app.dashboard') }}" class="flex items-center justify-center w-full h-full py-2">
                 @if(auth()->user()->barbershop && auth()->user()->barbershop->logo)
-                <!-- Si la barbería ya subió su logo, lo mostramos -->
-                <img src="{{ asset('storage/' . auth()->user()->barbershop->logo) }}" alt="Logo" class="h-10 w-auto">
+                <img src="{{ asset('storage/' . auth()->user()->barbershop->logo) }}" alt="Logo" class="max-h-14 w-auto object-contain">
                 @else
-                <!-- Si no, mostramos el nombre de la barbería -->
                 <span class="text-xl font-extrabold text-slate-900 dark:text-white truncate" title="{{ auth()->user()->barbershop->nombre ?? 'Barbería' }}">
                     {{ auth()->user()->barbershop->nombre ?? 'Mi Barbería' }}
                 </span>
