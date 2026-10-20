@@ -17,9 +17,8 @@
             @endphp
             {{ $saludo }}, {{ auth()->user()->name }}
             </h2>
-            <p class="text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-2">
-                <i data-lucide="calendar" class="w-4 h-4 text-barber-accent"></i>
-                {{ now()->translatedFormat('l, d \d\e F \d\e Y — H:i') }}
+            <p class="text-slate-500 dark:text-slate-400 mt-2">
+                Bienvenido al panel de control global de BarberOS.
             </p>
 </div>
 @endsection

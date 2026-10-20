@@ -19,9 +19,9 @@
         <div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700/50">
             <a href="{{ route('superadmin.dashboard') }}" class="flex items-center">
                 <!-- Logo Modo Claro -->
-                <img src="{{ asset('logos/logo-claro.png') }}" alt="BarberOS" class="h-15 w-auto block dark:hidden">
+                <img src="{{ asset('logos/logo-claro.png') }}" alt="BarberOS" class="h-12 w-auto block dark:hidden">
                 <!-- Logo Modo Oscuro -->
-                <img src="{{ asset('logos/logo-oscuro.png') }}" alt="BarberOS" class="h-15 w-auto hidden dark:block">
+                <img src="{{ asset('logos/logo-oscuro.png') }}" alt="BarberOS" class="h-12 w-auto hidden dark:block">
             </a>
         </div>
 
@@ -83,20 +83,44 @@
     <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
         <!-- Barra Superior -->
         <header class="h-16 bg-white/80 dark:bg-barber-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/50 flex items-center justify-between px-6 sticky top-0 z-10 transition-colors duration-300">
+
+            <!-- Izquierda: Título del panel -->
             <div class="flex items-center gap-4">
                 <h1 class="text-sm font-medium text-slate-500 dark:text-slate-400">Panel de Control Global</h1>
             </div>
 
-            <div class="flex items-center gap-4">
+            <!-- Derecha: Fecha, Hora y Usuario -->
+            <div class="flex items-center gap-5">
+
+                <!-- Reloj en tiempo real con efecto hover -->
+                <div x-data="{ 
+                        time: new Date().toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) 
+                    }"
+                    x-init="setInterval(() => { 
+                        time = new Date().toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) 
+                    }, 1000)"
+                    class="hidden lg:flex items-center gap-3 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md cursor-default">
+
+                    <span class="flex items-center gap-1.5">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-barber-accent"></i>
+                        {{ now()->translatedFormat('l, d \d\e F \d\e Y') }}
+                    </span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                    <span class="flex items-center gap-1.5 uppercase tracking-wide">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-barber-accent"></i>
+                        <span x-text="time">--:--:-- --</span>
+                    </span>
+                </div>
+
                 <!-- Botón Modo Claro / Oscuro -->
                 <button id="theme-toggle" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors">
                     <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
                     <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
                 </button>
 
-                <!-- Enlace al perfil desde el nombre del usuario -->
-                <a href="{{ route('superadmin.profile.edit') }}" class="flex items-center gap-3 hover:opacity-80 transition-opacity" title="Mi Perfil">
-                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ auth()->user()->name }}</span>
+                <!-- Perfil de Usuario -->
+                <a href="{{ route('superadmin.profile.edit') }}" class="flex items-center gap-3 hover:opacity-80 transition-opacity border-l border-slate-200 dark:border-slate-700/50 pl-5" title="Mi Perfil">
+                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">{{ auth()->user()->name }}</span>
                     <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-white font-bold border border-slate-300 dark:border-slate-600">
                         {{ substr(auth()->user()->name, 0, 1) }}
                     </div>
