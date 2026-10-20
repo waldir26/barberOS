@@ -51,7 +51,12 @@
                         </td>
                         <td class="px-6 py-4">
                             @if($barbershop->direccion)
-                            <button x-on:click="openMap = '{{ addslashes($barbershop->direccion) }}'" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 hover:text-barber-accent transition-colors" title="Ver mapa">
+                            <!-- Aquí usamos base64 para evitar que las comillas rompan el HTML -->
+                            <button type="button"
+                                data-mapa="{{ base64_encode($barbershop->direccion) }}"
+                                x-on:click="openMap = atob($event.currentTarget.dataset.mapa)"
+                                class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 hover:text-barber-accent transition-colors"
+                                title="Ver mapa">
                                 <i data-lucide="map-pin" class="w-4 h-4"></i>
                                 Ver mapa
                             </button>
@@ -246,19 +251,8 @@
                 </div>
 
                 <div class="p-6">
-                    <template x-if="openMap.includes('<iframe')">
-                        <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50 [&>iframe]:w-full [&>iframe]:h-full" x-html="openMap.replace('scrollwheel=\'true\'', 'scrollwheel=\'false\'').replace('scrollwheel=\" true\"', 'scrollwheel=\"false\"' )"></div>
-                    </template>
-
-                    <template x-if="!openMap.includes('<iframe')">
-                        <div class="text-center py-10">
-                            <p class="mb-4 text-slate-600 dark:text-slate-400">La ubicación está guardada como un enlace.</p>
-                            <a :href="openMap" target="_blank" class="inline-flex items-center gap-2 bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-xl transition-all shadow-sm">
-                                <i data-lucide="external-link" class="w-5 h-5"></i>
-                                Abrir en Google Maps
-                            </a>
-                        </div>
-                    </template>
+                    <!-- Volvemos al x-html original, pero forzamos el tamaño con clases de Tailwind -->
+                    <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50 [&>iframe]:w-full [&>iframe]:h-full" x-html="openMap"></div>
                 </div>
             </div>
         </div>

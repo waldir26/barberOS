@@ -22,7 +22,6 @@ class BarbershopController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // Quitamos el regex para que acepte el & y otros símbolos comerciales
             'nombre' => ['required', 'string', 'min:3', 'max:255'],
             'telefono' => ['required', 'numeric', 'digits:8'],
             'direccion' => ['required', 'string', function ($attribute, $value, $fail) {
@@ -76,10 +75,14 @@ class BarbershopController extends Controller
     public function update(Request $request, Barbershop $barbershop)
     {
         $validated = $request->validate([
-            // Aquí sí dejamos un regex que permite &, -, ., _
-            'nombre' => ['required', 'string', 'min:3', 'max:255', 'regex:/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\&\-\_\.]+$/'],
+            // Quitamos el regex para permitir & y validamos el iframe igual que en store
+            'nombre' => ['required', 'string', 'min:3', 'max:255'],
             'telefono' => ['required', 'numeric', 'digits:8'],
-            'direccion' => ['required', 'string'],
+            'direccion' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (!str_contains($value, '<iframe') && !filter_var($value, FILTER_VALIDATE_URL)) {
+                    $fail('La ubicación debe ser un código iframe de Google Maps o un enlace válido.');
+                }
+            }],
             'estado' => ['required', 'in:activa,suspendida,en_prueba,cancelada'],
             'motivo_estado' => ['nullable', 'string', 'max:255'],
         ]);
