@@ -2,48 +2,52 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
+        'barbershop_id',
+        'username',
         'name',
         'email',
         'password',
+        'activo',
+        'debe_cambiar_password',
+        'ultimo_login',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'activo' => 'boolean',
+            'debe_cambiar_password' => 'boolean',
+            'ultimo_login' => 'datetime',
         ];
+    }
+
+    public function barbershop()
+    {
+        return $this->belongsTo(Barbershop::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->barbershop_id === null && $this->hasRole('superadmin');
+    }
+
+    public function isBarbershopUser(): bool
+    {
+        return $this->barbershop_id !== null;
     }
 }
