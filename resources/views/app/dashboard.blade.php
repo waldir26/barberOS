@@ -21,8 +21,27 @@
                 Bienvenido al panel de administración de <strong>{{ auth()->user()->barbershop->nombre }}</strong>.
             </p>
 
-            <!-- Tarjetas de resumen (se llenarán con datos reales después) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <!-- Aviso si no tiene logo -->
+            @if(!auth()->user()->barbershop->logo)
+            <div class="mt-6 mb-8 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors duration-300">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
+                        <i data-lucide="image" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100">¡Personaliza tu barbería!</h3>
+                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">Aún no has subido el logo de tu negocio. Súbelo para que tus clientes y tu equipo reconozcan la marca.</p>
+                    </div>
+                </div>
+                <a href="{{ route('app.settings.edit') }}" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2 text-sm">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    Subir Logo
+                </a>
+            </div>
+            @endif
+
+            <!-- Tarjetas de resumen -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 {{ auth()->user()->barbershop->logo ? 'mt-8' : 'mt-2' }}">
                 <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-100 dark:border-slate-700/50">
                     <div class="flex items-center gap-3 mb-2">
                         <div class="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg">

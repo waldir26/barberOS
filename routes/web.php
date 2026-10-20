@@ -51,6 +51,9 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
     Route::get('/configuracion', [BarbershopSettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/configuracion', [BarbershopSettingsController::class, 'update'])->name('settings.update');
 
+    // Eliminar logo
+    Route::delete('/configuracion/logo', [BarbershopSettingsController::class, 'deleteLogo'])->name('settings.delete-logo');
+
     // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');

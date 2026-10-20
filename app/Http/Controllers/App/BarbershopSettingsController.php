@@ -53,4 +53,20 @@ class BarbershopSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Configuración actualizada correctamente.');
     }
+
+    public function deleteLogo()
+    {
+        $barbershop = Auth::user()->barbershop;
+
+        // Eliminamos el archivo físico si existe
+        if ($barbershop->logo && Storage::disk('public')->exists($barbershop->logo)) {
+            Storage::disk('public')->delete($barbershop->logo);
+        }
+
+        // Lo quitamos de la base de datos
+        $barbershop->logo = null;
+        $barbershop->save();
+
+        return redirect()->back()->with('success', 'Logo eliminado correctamente.');
+    }
 }
