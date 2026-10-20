@@ -18,13 +18,13 @@
         <div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700/50">
             <a href="{{ route('superadmin.dashboard') }}" class="flex items-center">
                 <!-- Logo Modo Claro -->
-                <img src="{{ asset('logos/logo-claro.png') }}" alt="BarberOS" class="h-10 w-auto block dark:hidden">
+                <img src="{{ asset('logos/logo-claro.png') }}" alt="BarberOS" class="h-15 w-auto block dark:hidden">
                 <!-- Logo Modo Oscuro -->
-                <img src="{{ asset('logos/logo-oscuro.png') }}" alt="BarberOS" class="h-10 w-auto hidden dark:block">
+                <img src="{{ asset('logos/logo-oscuro.png') }}" alt="BarberOS" class="h-15 w-auto hidden dark:block">
             </a>
         </div>
 
-        <nav class="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+        <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
             <!-- Botón Dashboard -->
             <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('superadmin.dashboard') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
                 <i data-lucide="layout-dashboard" class="w-5 h-5 {{ request()->routeIs('superadmin.dashboard') ? 'text-barber-accent' : '' }}"></i>
@@ -35,6 +35,35 @@
             <a href="{{ route('superadmin.barbershops.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('superadmin.barbershops.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
                 <i data-lucide="store" class="w-5 h-5 {{ request()->routeIs('superadmin.barbershops.*') ? 'text-barber-accent' : '' }}"></i>
                 Barberías
+            </a>
+
+            <!-- Separador sutil -->
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Sistema</p>
+            </div>
+
+            <!-- Botón Respaldos -->
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
+                <i data-lucide="database" class="w-5 h-5"></i>
+                Respaldos
+            </a>
+
+            <!-- Botón Auditoría -->
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                Auditoría
+            </a>
+
+            <!-- Botón Configuración -->
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                Configuración
+            </a>
+
+            <!-- Botón Perfil -->
+            <a href="{{ route('superadmin.profile.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('superadmin.profile.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="user" class="w-5 h-5 {{ request()->routeIs('superadmin.profile.*') ? 'text-barber-accent' : '' }}"></i>
+                Mi Perfil
             </a>
         </nav>
 
@@ -64,10 +93,13 @@
                     <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
                 </button>
 
-                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ auth()->user()->name }}</span>
-                <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-white font-bold border border-slate-300 dark:border-slate-600">
-                    {{ substr(auth()->user()->name, 0, 1) }}
-                </div>
+                <!-- Enlace al perfil desde el nombre del usuario -->
+                <a href="{{ route('superadmin.profile.edit') }}" class="flex items-center gap-3 hover:opacity-80 transition-opacity" title="Mi Perfil">
+                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ auth()->user()->name }}</span>
+                    <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-white font-bold border border-slate-300 dark:border-slate-600">
+                        {{ substr(auth()->user()->name, 0, 1) }}
+                    </div>
+                </a>
             </div>
         </header>
 

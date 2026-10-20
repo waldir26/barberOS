@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\SuperAdmin\BarbershopController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la raíz al login
@@ -35,9 +36,17 @@ Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmi
 
     // CRUD de Barberías
     Route::resource('barbershops', BarbershopController::class)->except(['show']);
+
+    // Perfil del Super Admin
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 // Panel de Barbería
 Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(function () {
     Route::get('/dashboard', fn() => view('app.dashboard'))->name('dashboard');
+
+    // Perfil del usuario de la barbería (Admin, Cajero, Barbero)
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 });
