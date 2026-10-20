@@ -18,16 +18,23 @@
         <div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700/50">
             <a href="{{ route('superadmin.dashboard') }}" class="flex items-center">
                 <!-- Logo Modo Claro -->
-                <img src="{{ asset('logos/logo-claro.png') }}" alt="BarberOS" class="h-15 w-auto block dark:hidden">
+                <img src="{{ asset('logos/logo-claro.png') }}" alt="BarberOS" class="h-10 w-auto block dark:hidden">
                 <!-- Logo Modo Oscuro -->
-                <img src="{{ asset('logos/logo-oscuro.png') }}" alt="BarberOS" class="h-15 w-auto hidden dark:block">
+                <img src="{{ asset('logos/logo-oscuro.png') }}" alt="BarberOS" class="h-10 w-auto hidden dark:block">
             </a>
         </div>
 
         <nav class="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-            <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white transition-all font-medium">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 text-barber-accent"></i>
+            <!-- Botón Dashboard -->
+            <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('superadmin.dashboard') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 {{ request()->routeIs('superadmin.dashboard') ? 'text-barber-accent' : '' }}"></i>
                 Dashboard
+            </a>
+
+            <!-- Botón Barberías -->
+            <a href="{{ route('superadmin.barbershops.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('superadmin.barbershops.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="store" class="w-5 h-5 {{ request()->routeIs('superadmin.barbershops.*') ? 'text-barber-accent' : '' }}"></i>
+                Barberías
             </a>
         </nav>
 
@@ -68,6 +75,60 @@
         <main class="p-6 flex-1">
             @yield('content')
         </main>
+    </div>
+
+    <!-- Contenedor de Notificaciones (Toasts) -->
+    <div x-data="{ 
+            show: false, 
+            message: '', 
+            type: 'success',
+            showToast(msg, t = 'success') {
+                this.message = msg;
+                this.type = t;
+                this.show = true;
+                setTimeout(() => { this.show = false; }, 4000); // Se oculta solo a los 4 segundos
+            }
+        }"
+        x-init="
+            @if(session('success')) showToast('{{ session('success') }}', 'success'); @endif
+            @if(session('error')) showToast('{{ session('error') }}', 'error'); @endif
+        "
+        class="fixed top-20 right-6 z-50">
+
+        <!-- Tarjeta de Notificación -->
+        <div x-show="show"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            style="display: none;"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border bg-white dark:bg-barber-card-dark min-w-[300px]"
+            :class="type === 'success' ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'">
+
+            <!-- Icono -->
+            <div :class="type === 'success' ? 'text-green-500' : 'text-red-500'">
+                <svg x-show="type === 'success'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <svg x-show="type === 'error'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+
+            <!-- Mensaje -->
+            <div>
+                <p class="text-sm font-medium text-slate-800 dark:text-slate-200" x-text="message"></p>
+            </div>
+
+            <!-- Botón de cerrar -->
+            <button @click="show = false" class="ml-auto text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
     </div>
 </body>
 

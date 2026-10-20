@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\SuperAdmin\BarbershopController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la raíz al login
@@ -31,6 +32,9 @@ Route::middleware('auth')->group(function () {
 // Panel Super Admin
 Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', fn() => view('superadmin.dashboard'))->name('dashboard');
+
+    // CRUD de Barberías
+    Route::resource('barbershops', BarbershopController::class)->except(['show']);
 });
 
 // Panel de Barbería

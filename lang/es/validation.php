@@ -106,22 +106,17 @@ return [
     'uuid' => 'El campo :attribute debe ser un UUID válido.',
 
     'custom' => [
-        'password' => [
-            'min' => 'La contraseña debe tener al menos :min caracteres.',
-            'mixed' => 'La contraseña debe contener al menos una mayúscula y una minúscula.',
-            'numbers' => 'La contraseña debe contener al menos un número.',
-            'symbols' => 'La contraseña debe contener al menos un símbolo.',
-            'letters' => 'La contraseña debe contener al menos una letra.',
-            'uncompromised' => 'La contraseña ha aparecido en una filtración de datos. Elige otra.',
+        'nombre' => [
+            'regex' => 'El nombre solo puede contener letras, números y espacios.',
         ],
     ],
 
     'attributes' => [
-        'username' => 'usuario',
-        'password' => 'contraseña',
-        'current_password' => 'contraseña actual',
-        'password_confirmation' => 'confirmación de contraseña',
-        'name' => 'nombre',
-        'email' => 'correo',
+        'nombre' => 'nombre de la barbería',
+        'telefono' => 'teléfono',
+        'direccion' => 'ubicación (Google Maps)',
+        'estado' => 'estado',
+        'admin_username' => 'usuario',
+        'admin_password' => 'contraseña',
     ],
 ];

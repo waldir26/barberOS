@@ -1,0 +1,265 @@
+@extends('layouts.superadmin')
+
+@section('title', 'Barberías')
+
+@section('content')
+<!-- Envolvemos todo en x-data para controlar los modales -->
+<div x-data="{ openModal: {{ $errors->any() ? 'true' : 'false' }}, openMap: null }">
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Barberías</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Gestiona las barberías registradas en el sistema.</p>
+        </div>
+        <!-- Botón que abre el modal -->
+        <button x-on:click="openModal = true" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-sm">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            Nueva Barbería
+        </button>
+    </div>
+
+    <div class="bg-white dark:bg-barber-card-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm border-b border-slate-200 dark:border-slate-700/50">
+                        <th class="px-6 py-4 font-medium">Barbería</th>
+                        <th class="px-6 py-4 font-medium">Ubicación</th>
+                        <th class="px-6 py-4 font-medium">Estado</th>
+                        <th class="px-6 py-4 font-medium">Usuarios</th>
+                        <th class="px-6 py-4 font-medium">Registro</th>
+                        <th class="px-6 py-4 font-medium text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
+                    @forelse ($barbershops as $barbershop)
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-slate-900 dark:text-white">{{ $barbershop->nombre }}</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">{{ $barbershop->slug }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($barbershop->direccion)
+                            <button x-on:click="openMap = '{{ addslashes($barbershop->direccion) }}'" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 hover:text-barber-accent transition-colors" title="Ver mapa">
+                                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                Ver mapa
+                            </button>
+                            @else
+                            <span class="text-sm text-slate-400">No asignada</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            @php
+                            $color = match($barbershop->estado) {
+                            'activa' => 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400',
+                            'en_prueba' => 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
+                            'suspendida' => 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
+                            'cancelada' => 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400',
+                            };
+                            @endphp
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium capitalize {{ $color }}">
+                                {{ str_replace('_', ' ', $barbershop->estado) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+                            {{ $barbershop->users_count }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300 text-sm">
+                            {{ $barbershop->created_at->format('d/m/Y') }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('superadmin.barbershops.edit', $barbershop) }}" class="p-2 text-slate-400 hover:text-barber-accent transition-colors" title="Editar">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </a>
+
+                                <form action="{{ route('superadmin.barbershops.destroy', $barbershop) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar esta barbería? Sus usuarios serán desactivados.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                            <i data-lucide="store" class="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-600"></i>
+                            <p>No hay barberías registradas todavía.</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if($barbershops->hasPages())
+        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/30">
+            {{ $barbershops->links() }}
+        </div>
+        @endif
+    </div>
+
+    <!-- MODAL DE CREACIÓN -->
+    <div x-show="openModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Fondo oscuro -->
+        <div x-show="openModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="openModal = false"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <!-- Contenido del Modal -->
+            <div x-show="openModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-barber-card-dark text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200 dark:border-slate-700/50">
+
+                <form action="{{ route('superadmin.barbershops.store') }}" method="POST" autocomplete="off">
+                    @csrf
+                    <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white" id="modal-title">Nueva Barbería</h3>
+                        <button type="button" x-on:click="openModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="px-6 py-4 space-y-4">
+                        <!-- Errores dentro del modal -->
+                        @if ($errors->any())
+                        <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Nombre -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre de la Barbería *</label>
+                                <input type="text" name="nombre" value="{{ old('nombre') }}" required minlength="3" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teléfono *</label>
+                                <div class="flex">
+                                    <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 sm:text-sm font-medium">
+                                        +503
+                                    </span>
+                                    <input type="text" name="telefono" value="{{ old('telefono') }}" required maxlength="8" placeholder="74795685" class="w-full rounded-r-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                                </div>
+                            </div>
+
+                            <!-- Estado -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Estado Inicial *</label>
+                                <select name="estado" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                                    <option value="en_prueba" {{ old('estado') == 'en_prueba' ? 'selected' : '' }}>En Prueba</option>
+                                    <option value="activa" {{ old('estado') == 'activa' ? 'selected' : '' }}>Activa</option>
+                                </select>
+                            </div>
+
+                            <!-- Ubicación -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ubicación (Google Maps) *</label>
+                                <input type="text" name="direccion" value="{{ old('direccion') }}" required placeholder="Pega el iframe o enlace de Google Maps" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-700/50 mt-4">
+                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                                <i data-lucide="key" class="w-4 h-4 text-barber-accent"></i>
+                                Credenciales de Acceso (Administrador de la Barbería)
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Usuario -->
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Usuario *</label>
+                                    <input type="text" name="admin_username" value="{{ old('admin_username') }}" required autocomplete="off" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                                </div>
+
+                                <!-- Contraseña con Ojito -->
+                                <div x-data="{ showPassword: false }">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contraseña *</label>
+                                    <div class="relative">
+                                        <input :type="showPassword ? 'text' : 'password'" name="admin_password" required minlength="8" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 pr-10 focus:ring-2 focus:ring-barber-accent">
+                                        <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 px-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                            <!-- Ojo abierto -->
+                                            <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <!-- Ojo cerrado -->
+                                            <svg x-show="showPassword" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+                        <button type="button" x-on:click="openModal = false" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancelar</button>
+                        <button type="submit" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE MAPA -->
+    <div x-show="openMap !== null" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Fondo oscuro -->
+        <div x-show="openMap !== null" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="openMap = null"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="openMap !== null"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-barber-card-dark text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl border border-slate-200 dark:border-slate-700/50">
+
+                <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Ubicación de la Barbería</h3>
+                    <button type="button" x-on:click="openMap = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <template x-if="openMap.includes('<iframe')">
+                        <!-- El div contenedor fuerza al iframe a medir el 100% -->
+                        <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50 [&>iframe]:w-full [&>iframe]:h-full" x-html="openMap"></div>
+                    </template>
+
+                    <template x-if="!openMap.includes('<iframe')">
+                        <div class="text-center py-10">
+                            <p class="mb-4 text-slate-600 dark:text-slate-400">La ubicación está guardada como un enlace.</p>
+                            <a :href="openMap" target="_blank" class="inline-flex items-center gap-2 bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-xl transition-all shadow-sm">
+                                <i data-lucide="external-link" class="w-5 h-5"></i>
+                                Abrir en Google Maps
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+@endsection
