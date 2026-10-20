@@ -11,21 +11,15 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Muestra el formulario de login (GET /login)
+// Autenticación
 Route::get('/login', [LoginController::class, 'show'])->name('login');
-
-// Procesa el login (POST /login)
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-
-// Cierra sesión (POST /logout)
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Rutas solo para usuarios autenticados
 Route::middleware('auth')->group(function () {
-
     // Muestra el formulario de cambio de contraseña obligatorio
     Route::get('/cambiar-password', [PasswordChangeController::class, 'show'])->name('password.change');
-
     // Procesa el cambio de contraseña
     Route::post('/cambiar-password', [PasswordChangeController::class, 'update'])->name('password.change.post');
 });
