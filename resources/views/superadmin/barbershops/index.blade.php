@@ -3,15 +3,26 @@
 @section('title', 'Barberías')
 
 @section('content')
-<!-- Envolvemos todo en x-data para controlar los modales -->
-<div x-data="{ openModal: {{ $errors->any() ? 'true' : 'false' }}, openMap: null }">
+<!-- Envolvemos todo en x-data para controlar los modales y sus variables -->
+<div x-data="{ 
+    openModal: {{ $errors->any() && !request()->isMethod('PUT') ? 'true' : 'false' }}, 
+    openMap: null,
+    editModal: false,
+    editAction: '',
+    editNombre: '',
+    editTelefono: '',
+    editDireccion: '',
+    editEstado: '',
+    deleteModal: false,
+    deleteAction: ''
+}">
 
     <div class="flex justify-between items-center mb-6">
         <div>
             <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Barberías</h2>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Gestiona las barberías registradas en el sistema.</p>
         </div>
-        <!-- Botón que abre el modal -->
+        <!-- Botón que abre el modal de Crear -->
         <button x-on:click="openModal = true" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-sm">
             <i data-lucide="plus" class="w-5 h-5"></i>
             Nueva Barbería
@@ -69,17 +80,25 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2">
-                                <a href="{{ route('superadmin.barbershops.edit', $barbershop) }}" class="p-2 text-slate-400 hover:text-barber-accent transition-colors" title="Editar">
+                                <!-- Botón Editar -->
+                                <button x-on:click="
+                                    editModal = true; 
+                                    editAction = '{{ route('superadmin.barbershops.update', $barbershop) }}';
+                                    editNombre = '{{ addslashes($barbershop->nombre) }}';
+                                    editTelefono = '{{ str_replace('+503 ', '', $barbershop->telefono) }}';
+                                    editDireccion = '{{ addslashes($barbershop->direccion) }}';
+                                    editEstado = '{{ $barbershop->estado }}';
+                                " class="p-2 text-slate-400 hover:text-barber-accent transition-colors" title="Editar">
                                     <i data-lucide="edit" class="w-4 h-4"></i>
-                                </a>
+                                </button>
 
-                                <form action="{{ route('superadmin.barbershops.destroy', $barbershop) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar esta barbería? Sus usuarios serán desactivados.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                </form>
+                                <!-- Botón Eliminar (abre el modal) -->
+                                <button type="button" x-on:click="
+                                    deleteModal = true;
+                                    deleteAction = '{{ route('superadmin.barbershops.destroy', $barbershop) }}';
+                                " class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -104,11 +123,9 @@
 
     <!-- MODAL DE CREACIÓN -->
     <div x-show="openModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <!-- Fondo oscuro -->
         <div x-show="openModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="openModal = false"></div>
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <!-- Contenido del Modal -->
             <div x-show="openModal"
                 x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -129,7 +146,7 @@
 
                     <div class="px-6 py-4 space-y-4">
                         <!-- Errores dentro del modal -->
-                        @if ($errors->any())
+                        @if ($errors->any() && !request()->isMethod('PUT'))
                         <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
@@ -140,13 +157,10 @@
                         @endif
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Nombre -->
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre de la Barbería *</label>
                                 <input type="text" name="nombre" value="{{ old('nombre') }}" required minlength="3" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                             </div>
-
-                            <!-- Teléfono -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teléfono *</label>
                                 <div class="flex">
@@ -156,8 +170,6 @@
                                     <input type="text" name="telefono" value="{{ old('telefono') }}" required maxlength="8" placeholder="74795685" class="w-full rounded-r-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                                 </div>
                             </div>
-
-                            <!-- Estado -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Estado Inicial *</label>
                                 <select name="estado" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
@@ -165,8 +177,6 @@
                                     <option value="activa" {{ old('estado') == 'activa' ? 'selected' : '' }}>Activa</option>
                                 </select>
                             </div>
-
-                            <!-- Ubicación -->
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ubicación (Google Maps) *</label>
                                 <input type="text" name="direccion" value="{{ old('direccion') }}" required placeholder="Pega el iframe o enlace de Google Maps" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
@@ -179,24 +189,19 @@
                                 Credenciales de Acceso (Administrador de la Barbería)
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Usuario -->
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Usuario *</label>
                                     <input type="text" name="admin_username" value="{{ old('admin_username') }}" required autocomplete="off" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                                 </div>
-
-                                <!-- Contraseña con Ojito -->
                                 <div x-data="{ showPassword: false }">
                                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contraseña *</label>
                                     <div class="relative">
                                         <input :type="showPassword ? 'text' : 'password'" name="admin_password" required minlength="8" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 pr-10 focus:ring-2 focus:ring-barber-accent">
                                         <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 px-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                                            <!-- Ojo abierto -->
                                             <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
-                                            <!-- Ojo cerrado -->
                                             <svg x-show="showPassword" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                                             </svg>
@@ -221,7 +226,6 @@
 
     <!-- MODAL DE MAPA -->
     <div x-show="openMap !== null" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <!-- Fondo oscuro -->
         <div x-show="openMap !== null" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="openMap = null"></div>
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
@@ -243,8 +247,7 @@
 
                 <div class="p-6">
                     <template x-if="openMap.includes('<iframe')">
-                        <!-- El div contenedor fuerza al iframe a medir el 100% -->
-                        <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50 [&>iframe]:w-full [&>iframe]:h-full" x-html="openMap"></div>
+                        <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50 [&>iframe]:w-full [&>iframe]:h-full" x-html="openMap.replace('scrollwheel=\'true\'', 'scrollwheel=\'false\'').replace('scrollwheel=\" true\"', 'scrollwheel=\"false\"' )"></div>
                     </template>
 
                     <template x-if="!openMap.includes('<iframe')">
@@ -257,6 +260,132 @@
                         </div>
                     </template>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDICIÓN -->
+    <div x-show="editModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="editModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="editModal = false"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="editModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-barber-card-dark text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200 dark:border-slate-700/50">
+
+                <form :action="editAction" method="POST" autocomplete="off">
+                    @csrf
+                    @method('PUT')
+                    <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Editar Barbería</h3>
+                        <button type="button" x-on:click="editModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="px-6 py-4 space-y-4">
+                        <!-- Errores dentro del modal de edición -->
+                        @if ($errors->any() && request()->isMethod('PUT'))
+                        <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Nombre -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre de la Barbería *</label>
+                                <input type="text" name="nombre" x-model="editNombre" required minlength="3" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teléfono *</label>
+                                <div class="flex">
+                                    <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 sm:text-sm font-medium">
+                                        +503
+                                    </span>
+                                    <input type="text" name="telefono" x-model="editTelefono" required maxlength="8" class="w-full rounded-r-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                                </div>
+                            </div>
+
+                            <!-- Estado -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Estado *</label>
+                                <select name="estado" x-model="editEstado" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                                    <option value="en_prueba">En Prueba</option>
+                                    <option value="activa">Activa</option>
+                                    <option value="suspendida">Suspendida</option>
+                                    <option value="cancelada">Cancelada</option>
+                                </select>
+                            </div>
+
+                            <!-- Ubicación -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ubicación (Google Maps) *</label>
+                                <input type="text" name="direccion" x-model="editDireccion" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+                        <button type="button" x-on:click="editModal = false" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancelar</button>
+                        <button type="submit" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ELIMINAR -->
+    <div x-show="deleteModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="deleteModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="deleteModal = false"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="deleteModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-barber-card-dark text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-200 dark:border-slate-700/50">
+
+                <form :action="deleteAction" method="POST">
+                    @csrf
+                    @method('DELETE')
+
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-500/20 rounded-full mb-4">
+                            <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-center text-slate-900 dark:text-white mb-2">Eliminar Barbería</h3>
+                        <p class="text-sm text-center text-slate-500 dark:text-slate-400">
+                            ¿Estás seguro de que deseas eliminar esta barbería? Los usuarios asociados serán desactivados y no podrán iniciar sesión.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 flex justify-center gap-3 rounded-b-2xl">
+                        <button type="button" x-on:click="deleteModal = false" class="px-5 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-xl transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-5 rounded-xl transition-all shadow-sm">
+                            Sí, eliminar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
