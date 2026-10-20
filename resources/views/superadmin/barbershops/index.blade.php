@@ -37,7 +37,7 @@
                         <th class="px-6 py-4 font-medium">Barbería</th>
                         <th class="px-6 py-4 font-medium">Ubicación</th>
                         <th class="px-6 py-4 font-medium">Estado</th>
-                        <th class="px-6 py-4 font-medium">Usuarios</th>
+                        <th class="px-6 py-4 font-medium">Administrador</th>
                         <th class="px-6 py-4 font-medium">Registro</th>
                         <th class="px-6 py-4 font-medium text-right">Acciones</th>
                     </tr>
@@ -51,7 +51,6 @@
                         </td>
                         <td class="px-6 py-4">
                             @if($barbershop->direccion)
-                            <!-- Aquí usamos base64 para evitar que las comillas rompan el HTML -->
                             <button type="button"
                                 data-mapa="{{ base64_encode($barbershop->direccion) }}"
                                 x-on:click="openMap = atob($event.currentTarget.dataset.mapa)"
@@ -77,8 +76,20 @@
                                 {{ str_replace('_', ' ', $barbershop->estado) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
-                            {{ $barbershop->users_count }}
+                        <td class="px-6 py-4">
+                            @php
+                            $admin = $barbershop->users->first();
+                            @endphp
+                            @if($admin)
+                            <div class="text-sm font-medium text-slate-900 dark:text-white">
+                                {{ $admin->name }}
+                            </div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">
+                                @ {{ $admin->username }}
+                            </div>
+                            @else
+                            <span class="text-sm text-slate-400">Sin admin</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300 text-sm">
                             {{ $barbershop->created_at->format('d/m/Y') }}
@@ -194,10 +205,19 @@
                                 Credenciales de Acceso (Administrador de la Barbería)
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- NUEVO CAMPO: Nombre Completo del Admin -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre completo del Administrador *</label>
+                                    <input type="text" name="admin_name" value="{{ old('admin_name') }}" required placeholder="Ej. Carlos Lizama" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                                </div>
+
+                                <!-- Usuario -->
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Usuario *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre de usuario *</label>
                                     <input type="text" name="admin_username" value="{{ old('admin_username') }}" required autocomplete="off" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                                 </div>
+
+                                <!-- Contraseña con Ojito -->
                                 <div x-data="{ showPassword: false }">
                                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contraseña *</label>
                                     <div class="relative">
@@ -251,7 +271,6 @@
                 </div>
 
                 <div class="p-6">
-                    <!-- Volvemos al x-html original, pero forzamos el tamaño con clases de Tailwind -->
                     <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50 [&>iframe]:w-full [&>iframe]:h-full" x-html="openMap"></div>
                 </div>
             </div>
@@ -283,7 +302,6 @@
                     </div>
 
                     <div class="px-6 py-4 space-y-4">
-                        <!-- Errores dentro del modal de edición -->
                         @if ($errors->any() && request()->isMethod('PUT'))
                         <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
                             <ul class="list-disc list-inside">
@@ -295,13 +313,10 @@
                         @endif
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Nombre -->
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre de la Barbería *</label>
                                 <input type="text" name="nombre" x-model="editNombre" required minlength="3" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                             </div>
-
-                            <!-- Teléfono -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teléfono *</label>
                                 <div class="flex">
@@ -311,8 +326,6 @@
                                     <input type="text" name="telefono" x-model="editTelefono" required maxlength="8" class="w-full rounded-r-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                                 </div>
                             </div>
-
-                            <!-- Estado -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Estado *</label>
                                 <select name="estado" x-model="editEstado" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
@@ -322,8 +335,6 @@
                                     <option value="cancelada">Cancelada</option>
                                 </select>
                             </div>
-
-                            <!-- Ubicación -->
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ubicación (Google Maps) *</label>
                                 <input type="text" name="direccion" x-model="editDireccion" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">

@@ -15,7 +15,11 @@ class BarbershopController extends Controller
 {
     public function index()
     {
-        $barbershops = Barbershop::withCount('users')->latest()->paginate(10);
+        // Buscamos las barberías y cargamos solo al usuario que tiene el rol 'admin'
+        $barbershops = Barbershop::with(['users' => function ($query) {
+            $query->role('admin');
+        }])->latest()->paginate(10);
+
         return view('superadmin.barbershops.index', compact('barbershops'));
     }
 
@@ -30,6 +34,9 @@ class BarbershopController extends Controller
                 }
             }],
             'estado' => ['required', 'in:activa,en_prueba'],
+
+            // Nuevos campos del administrador
+            'admin_name' => ['required', 'string', 'max:255'],
             'admin_username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,username'],
             'admin_password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()],
         ]);
@@ -49,7 +56,7 @@ class BarbershopController extends Controller
 
             $admin = User::create([
                 'barbershop_id' => $barbershop->id,
-                'name' => 'Administrador ' . $barbershop->nombre,
+                'name' => $validated['admin_name'], // <-- Ahora usa el nombre real ingresado
                 'username' => $validated['admin_username'],
                 'password' => Hash::make($validated['admin_password']),
                 'activo' => true,
@@ -75,7 +82,6 @@ class BarbershopController extends Controller
     public function update(Request $request, Barbershop $barbershop)
     {
         $validated = $request->validate([
-            // Quitamos el regex para permitir & y validamos el iframe igual que en store
             'nombre' => ['required', 'string', 'min:3', 'max:255'],
             'telefono' => ['required', 'numeric', 'digits:8'],
             'direccion' => ['required', 'string', function ($attribute, $value, $fail) {
