@@ -86,8 +86,8 @@
             </div>
 
             <!-- Configuración -->
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
-                <i data-lucide="settings" class="w-5 h-5"></i>
+            <a href="{{ route('app.settings.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.settings.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="settings" class="w-5 h-5 {{ request()->routeIs('app.settings.*') ? 'text-barber-accent' : '' }}"></i>
                 Configuración
             </a>
 

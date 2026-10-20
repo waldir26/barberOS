@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\SuperAdmin\BarbershopController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\App\BarbershopSettingsController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la raíz al login
@@ -11,15 +12,21 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Autenticación
+// Muestra el formulario de login (GET /login)
 Route::get('/login', [LoginController::class, 'show'])->name('login');
+
+// Procesa el login (POST /login)
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+
+// Cierra sesión (POST /logout)
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Rutas solo para usuarios autenticados
 Route::middleware('auth')->group(function () {
+
     // Muestra el formulario de cambio de contraseña obligatorio
     Route::get('/cambiar-password', [PasswordChangeController::class, 'show'])->name('password.change');
+
     // Procesa el cambio de contraseña
     Route::post('/cambiar-password', [PasswordChangeController::class, 'update'])->name('password.change.post');
 });
@@ -31,7 +38,7 @@ Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmi
     // CRUD de Barberías
     Route::resource('barbershops', BarbershopController::class)->except(['show']);
 
-    // Perfil del Super Admin
+    // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 });
@@ -40,7 +47,11 @@ Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmi
 Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(function () {
     Route::get('/dashboard', fn() => view('app.dashboard'))->name('dashboard');
 
-    // Perfil del usuario de la barbería (Admin, Cajero, Barbero)
+    // Configuración de la Barbería
+    Route::get('/configuracion', [BarbershopSettingsController::class, 'edit'])->name('settings.edit');
+    Route::put('/configuracion', [BarbershopSettingsController::class, 'update'])->name('settings.update');
+
+    // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 });
