@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\SuperAdmin\BarbershopController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\App\BarbershopSettingsController;
+use App\Http\Controllers\App\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la raíz al login
@@ -53,6 +54,9 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
 
     // Eliminar logo
     Route::delete('/configuracion/logo', [BarbershopSettingsController::class, 'deleteLogo'])->name('settings.delete-logo');
+
+    // Servicios
+    Route::resource('servicios', ServiceController::class)->except(['create', 'show', 'edit']);
 
     // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');

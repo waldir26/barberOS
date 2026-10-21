@@ -30,7 +30,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100">¡Personaliza tu barbería!</h3>
-                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">Aún no has subido el logo de tu negocio. Súbelo para que tus clientes y tu equipo reconozcan la marca.</p>
+                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">Aún no has subido el logo de tu negocio.</p>
                     </div>
                 </div>
                 <a href="{{ route('app.settings.edit') }}" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2 text-sm">

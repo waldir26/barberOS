@@ -53,10 +53,13 @@
             <div class="pt-4 pb-2">
                 <p class="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Administración</p>
             </div>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
-                <i data-lucide="scissors" class="w-5 h-5"></i>
+
+            <!-- Servicios -->
+            <a href="{{ route('app.servicios.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.servicios.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="scissors" class="w-5 h-5 {{ request()->routeIs('app.servicios.*') ? 'text-barber-accent' : '' }}"></i>
                 Servicios
             </a>
+
             <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
                 <i data-lucide="user-square" class="w-5 h-5"></i>
                 Barberos
