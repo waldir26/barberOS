@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Concerns\BelongsToBarbershop;
 
 class Product extends Model
 {
-    use SoftDeletes, BelongsToBarbershop;
+    use BelongsToBarbershop; // <-- Ya no está SoftDeletes
 
     protected $fillable = [
         'barbershop_id',
         'codigo',
         'nombre',
+        'categoria',
+        'categoria_id',
         'marca',
         'foto',
         'precio',
@@ -26,4 +27,9 @@ class Product extends Model
         'precio' => 'decimal:2',
         'activo' => 'boolean',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'categoria_id');
+    }
 }

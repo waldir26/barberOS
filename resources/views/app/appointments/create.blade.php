@@ -27,7 +27,20 @@
     </div>
 
     <div class="bg-white dark:bg-barber-card-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 p-6">
-        <form action="{{ route('app.appointments.store') }}" method="POST" autocomplete="off">
+        <form action="{{ route('app.appointments.store') }}" method="POST" autocomplete="off"
+            x-data="{
+                search: '',
+                selectedClient: null,
+                clients: {{ $clients->toJson() }},
+                get filteredClients() {
+                    if (this.search === '') return [];
+                    let query = this.search.toLowerCase();
+                    return this.clients.filter(c => 
+                        c.nombre.toLowerCase().includes(query) || 
+                        (c.telefono && c.telefono.toLowerCase().includes(query))
+                    ).slice(0, 5); // Mostrar solo los primeros 5 resultados
+                }
+            }">
             @csrf
 
             @if ($errors->any())
@@ -41,17 +54,45 @@
             @endif
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Cliente -->
-                <div class="md:col-span-2">
+                <!-- Buscador de Cliente -->
+                <div class="md:col-span-2 relative">
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Cliente *</label>
-                    <select name="client_id" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
-                        <option value="">Seleccione un cliente</option>
-                        @foreach($clients as $client)
-                        <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                            {{ $client->nombre }} {{ $client->telefono ? '- ' . $client->telefono : '' }}
-                        </option>
-                        @endforeach
-                    </select>
+
+                    <!-- Input oculto que se envía al servidor -->
+                    <input type="hidden" name="client_id" :value="selectedClient ? selectedClient.id : ''">
+
+                    <!-- Si ya hay un cliente seleccionado, mostramos su tarjeta -->
+                    <template x-if="selectedClient">
+                        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-barber-accent">
+                            <div>
+                                <p class="font-bold text-slate-900 dark:text-white" x-text="selectedClient.nombre"></p>
+                                <p class="text-xs text-slate-500" x-text="selectedClient.telefono || 'Sin teléfono'"></p>
+                            </div>
+                            <button type="button" x-on:click="selectedClient = null; search = ''" class="text-slate-400 hover:text-red-500">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Si no hay cliente, mostramos el buscador -->
+                    <template x-if="!selectedClient">
+                        <div class="relative">
+                            <input type="text" x-model="search" placeholder="Escribe el nombre o teléfono del cliente..." class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+
+                            <!-- Lista de resultados flotante -->
+                            <div x-show="search.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-barber-card-dark border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                <template x-for="client in filteredClients" :key="client.id">
+                                    <div x-on:click="selectedClient = client; search = ''" class="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                                        <p class="font-medium text-slate-900 dark:text-white text-sm" x-text="client.nombre"></p>
+                                        <p class="text-xs text-slate-500" x-text="client.telefono"></p>
+                                    </div>
+                                </template>
+                                <div x-show="filteredClients.length === 0" class="p-3 text-sm text-slate-500 text-center">
+                                    No se encontraron clientes.
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                 </div>
 
                 <!-- Barbero -->

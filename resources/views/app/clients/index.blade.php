@@ -4,7 +4,7 @@
 
 @section('content')
 <div x-data="{ 
-    openModal: {{ $errors->any() && !request()->isMethod('PUT') ? 'true' : 'false' }}, 
+    openModal: {{ $errors->any() && !request()->isMethod('POST') ? 'true' : 'false' }}, 
     editModal: false,
     editAction: '',
     editNombre: '',
@@ -85,7 +85,7 @@
                             <div class="flex justify-end gap-2">
                                 <button x-on:click="
                                     editModal = true; 
-                                    editAction = '{{ route('app.clientes.update', $client) }}';
+                                    editAction = '{{ route('app.clientes.update', $client->id) }}';
                                     editNombre = '{{ addslashes($client->nombre) }}';
                                     editTelefono = '{{ $client->telefono }}';
                                     editEmail = '{{ $client->email }}';
@@ -94,9 +94,10 @@
                                     <i data-lucide="edit" class="w-4 h-4"></i>
                                 </button>
 
+                                <!-- Botón Eliminar -->
                                 <button type="button" x-on:click="
                                     deleteModal = true;
-                                    deleteAction = '{{ route('app.clientes.destroy', $client) }}';
+                                    deleteAction = '{{ route('app.clientes.delete', $client->id) }}';
                                 " class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
@@ -146,7 +147,7 @@
                     </div>
 
                     <div class="px-6 py-4 space-y-4">
-                        @if ($errors->any() && !request()->isMethod('PUT'))
+                        @if ($errors->any())
                         <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
@@ -206,7 +207,6 @@
 
                 <form :action="editAction" method="POST" autocomplete="off">
                     @csrf
-                    @method('PUT')
                     <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Editar Cliente</h3>
                         <button type="button" x-on:click="editModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -215,7 +215,7 @@
                     </div>
 
                     <div class="px-6 py-4 space-y-4">
-                        @if ($errors->any() && request()->isMethod('PUT'))
+                        @if ($errors->any())
                         <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
@@ -275,8 +275,6 @@
 
                 <form :action="deleteAction" method="POST">
                     @csrf
-                    @method('DELETE')
-
                     <div class="p-6">
                         <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-500/20 rounded-full mb-4">
                             <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600 dark:text-red-400"></i>

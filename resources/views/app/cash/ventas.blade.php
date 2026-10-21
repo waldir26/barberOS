@@ -15,7 +15,7 @@
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Registro de ventas de ceras, shampoo y otros productos.</p>
         </div>
 
-        <button x-on:click="ventaModal = true" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm shrink-0">
+        <button x-on:click="ventaModal = true" class="w-full sm:w-auto bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm shrink-0">
             <i data-lucide="plus-circle" class="w-5 h-5"></i> Registrar Venta
         </button>
     </div>
@@ -23,7 +23,7 @@
     <!-- Tarjeta de Total -->
     <div class="bg-white dark:bg-barber-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-700/50 shadow-sm mb-6">
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total en ventas hoy</p>
-        <p class="text-3xl font-bold text-green-600 dark:text-green-400">${{ number_format($totalVentas, 2) }}</p>
+        <p class="text-3xl font-bold text-slate-900 dark:text-white">${{ number_format($totalVentas, 2) }}</p>
     </div>
 
     <!-- Tabla de Ventas -->
@@ -47,7 +47,7 @@
                         <td class="px-6 py-4">
                             <div class="font-medium text-slate-900 dark:text-white">{{ $venta->descripcion }}</div>
                         </td>
-                        <td class="px-6 py-4 font-bold text-green-600 dark:text-green-400">
+                        <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
                             +${{ number_format($venta->monto, 2) }}
                         </td>
                         <td class="px-6 py-4 text-right">
@@ -72,7 +72,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE VENTA -->
+    <!-- MODAL DE VENTA (CARRITO) -->
     <div x-show="ventaModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="ventaModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="ventaModal = false"></div>
 
@@ -84,10 +84,42 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-barber-card-dark text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-200 dark:border-slate-700/50">
+                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-barber-card-dark text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200 dark:border-slate-700/50">
 
-                <form action="{{ route('app.cash.store-ingreso') }}" method="POST" autocomplete="off">
+                <form action="{{ route('app.cash.store-ingreso') }}" method="POST" autocomplete="off"
+                    x-data="{
+                        search: '',
+                        cart: [],
+                        products: {{ $products->toJson() }},
+                        get filteredProducts() {
+                            if (this.search === '') return [];
+                            let query = this.search.toLowerCase();
+                            return this.products.filter(p => 
+                                p.nombre.toLowerCase().includes(query) || 
+                                p.codigo.toLowerCase().includes(query) || 
+                                (p.marca && p.marca.toLowerCase().includes(query))
+                            ).slice(0, 5);
+                        },
+                        get cartTotal() {
+                            return this.cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0).toFixed(2);
+                        },
+                        addToCart(product) {
+                            let existing = this.cart.find(item => item.id === product.id);
+                            if (existing) {
+                                if (existing.cantidad < existing.stock) existing.cantidad++;
+                                else alert('No hay más stock de este producto.');
+                            } else {
+                                this.cart.push({ ...product, cantidad: 1 });
+                            }
+                            this.search = '';
+                        },
+                        removeFromCart(index) {
+                            this.cart.splice(index, 1);
+                        }
+                    }">
                     @csrf
+                    <input type="hidden" name="items" :value="JSON.stringify(cart)">
+
                     <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white" id="modal-title">Registrar Venta</h3>
                         <button type="button" x-on:click="ventaModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -106,22 +138,71 @@
                         </div>
                         @endif
 
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Producto / Descripción *</label>
-                            <input type="text" name="descripcion" value="{{ old('descripcion') }}" required placeholder="Ej. Cera para cabello, Shampoo..." class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-green-500">
+                        <!-- Buscador -->
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Agregar Producto</label>
+                            <input type="text" x-model="search" placeholder="Buscar por código, nombre o marca..." class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+
+                            <div x-show="search.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-barber-card-dark border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                <template x-for="product in filteredProducts" :key="product.id">
+                                    <div x-on:click="addToCart(product)" class="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-100 dark:border-slate-700/50 last:border-0 flex justify-between items-center">
+                                        <div>
+                                            <p class="font-medium text-slate-900 dark:text-white text-sm" x-text="product.nombre"></p>
+                                            <p class="text-xs text-slate-500">
+                                                <span x-text="product.codigo"></span> | <span x-text="product.marca"></span>
+                                            </p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-bold text-sm text-slate-900 dark:text-white">$<span x-text="product.precio"></span></p>
+                                            <p class="text-xs text-slate-500">Stock: <span x-text="product.stock"></span></p>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="filteredProducts.length === 0" class="p-3 text-sm text-slate-500 text-center">
+                                    No se encontraron productos.
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Monto ($) *</label>
-                            <input type="number" step="0.01" name="monto" value="{{ old('monto') }}" required min="0.01" placeholder="0.00" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-green-500">
+                        <!-- Carrito -->
+                        <div class="mt-4 border-t border-slate-200 dark:border-slate-700/50 pt-4">
+                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-3">Productos a cobrar</h4>
+
+                            <div x-show="cart.length === 0" class="text-center py-6 text-sm text-slate-500">
+                                No has agregado productos.
+                            </div>
+
+                            <div class="space-y-2">
+                                <template x-for="(item, index) in cart" :key="index">
+                                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700/50">
+                                        <div class="flex-1">
+                                            <p class="font-medium text-slate-900 dark:text-white text-sm" x-text="item.nombre"></p>
+                                            <p class="text-xs text-slate-500">$<span x-text="item.precio"></span> c/u</p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <input type="number" x-model="item.cantidad" :max="item.stock" min="1" class="w-16 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-2 py-1 text-center text-sm">
+                                            <p class="font-bold text-slate-900 dark:text-white w-16 text-right">$<span x-text="(item.precio * item.cantidad).toFixed(2)"></span></p>
+                                            <button type="button" x-on:click="removeFromCart(index)" class="text-slate-400 hover:text-red-500">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
-                        <button type="button" x-on:click="ventaModal = false" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancelar</button>
-                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2">
-                            <i data-lucide="save" class="w-4 h-4"></i> Guardar Venta
-                        </button>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-b-2xl">
+                        <div class="text-lg">
+                            <span class="text-slate-600 dark:text-slate-400 text-sm">Total a cobrar:</span>
+                            <span class="text-2xl font-bold text-slate-900 dark:text-white ml-2">$<span x-text="cartTotal"></span></span>
+                        </div>
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <button type="button" x-on:click="ventaModal = false" class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancelar</button>
+                            <button type="submit" :disabled="cart.length === 0" class="flex-1 sm:flex-none bg-barber-accent hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i> Cobrar
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

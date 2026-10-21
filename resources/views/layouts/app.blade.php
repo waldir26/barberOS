@@ -34,7 +34,14 @@
             </button>
         </div>
 
-        <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+        <!-- Lógica para recordar el scroll del menú -->
+        <nav x-data="{ 
+                scrollPos: sessionStorage.getItem('sidebar-scroll') || 0 
+            }"
+            x-init="$nextTick(() => { $el.scrollTop = scrollPos; })"
+            @scroll.debounce.100ms="sessionStorage.setItem('sidebar-scroll', $el.scrollTop)"
+            class="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+
             <div class="pb-2">
                 <p class="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Operación</p>
             </div>
@@ -91,25 +98,25 @@
 
             <!-- Ventas de Productos -->
             <a href="{{ route('app.cash.ventas') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.ventas') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
-                <i data-lucide="shopping-bag" class="w-5 h-5 {{ request()->routeIs('app.cash.ventas') ? 'text-green-500' : '' }}"></i>
+                <i data-lucide="shopping-bag" class="w-5 h-5 {{ request()->routeIs('app.cash.ventas') ? 'text-barber-accent' : '' }}"></i>
                 Ventas de Productos
             </a>
 
             <!-- Gastos -->
             <a href="{{ route('app.cash.gastos') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.gastos') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
-                <i data-lucide="receipt" class="w-5 h-5 {{ request()->routeIs('app.cash.gastos') ? 'text-red-500' : '' }}"></i>
+                <i data-lucide="receipt" class="w-5 h-5 {{ request()->routeIs('app.cash.gastos') ? 'text-barber-accent' : '' }}"></i>
                 Gastos
             </a>
 
             <!-- Pagos a Barberos -->
             <a href="{{ route('app.cash.pagos') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.pagos') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
-                <i data-lucide="user-check" class="w-5 h-5 {{ request()->routeIs('app.cash.pagos') ? 'text-amber-500' : '' }}"></i>
+                <i data-lucide="user-check" class="w-5 h-5 {{ request()->routeIs('app.cash.pagos') ? 'text-barber-accent' : '' }}"></i>
                 Pagos a Barberos
             </a>
 
             <!-- Cierre de Caja -->
             <a href="{{ route('app.cash.cierre') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.cierre') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
-                <i data-lucide="bar-chart-2" class="w-5 h-5 {{ request()->routeIs('app.cash.cierre') ? 'text-blue-500' : '' }}"></i>
+                <i data-lucide="bar-chart-2" class="w-5 h-5 {{ request()->routeIs('app.cash.cierre') ? 'text-barber-accent' : '' }}"></i>
                 Cierre de Caja
             </a>
 
@@ -131,7 +138,8 @@
         </nav>
 
         <div class="p-4 border-t border-slate-200 dark:border-slate-700/50">
-            <form method="POST" action="{{ route('logout') }}">
+            <!-- Limpiamos la memoria del scroll al cerrar sesión -->
+            <form method="POST" action="{{ route('logout') }}" x-data @submit="sessionStorage.removeItem('sidebar-scroll')">
                 @csrf
                 <button class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all">
                     <i data-lucide="log-out" class="w-5 h-5"></i>

@@ -12,6 +12,7 @@ use App\Http\Controllers\App\BarberController;
 use App\Http\Controllers\App\DashboardController;
 use App\Http\Controllers\App\CashController;
 use App\Http\Controllers\App\ProductController;
+use App\Http\Controllers\App\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la raíz al login
@@ -42,8 +43,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', fn() => view('superadmin.dashboard'))->name('dashboard');
 
-    // CRUD de Barberías
-    Route::resource('barbershops', BarbershopController::class)->except(['show']);
+    // CRUD de Barberías (Rutas manuales con POST)
+    Route::get('/barbershops', [BarbershopController::class, 'index'])->name('barbershops.index');
+    Route::post('/barbershops', [BarbershopController::class, 'store'])->name('barbershops.store');
+    Route::post('/barbershops/{barbershop}/update', [BarbershopController::class, 'update'])->name('barbershops.update');
+    Route::post('/barbershops/{barbershop}/delete', [BarbershopController::class, 'destroy'])->name('barbershops.destroy');
 
     // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -62,25 +66,41 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
     Route::delete('/configuracion/logo', [BarbershopSettingsController::class, 'deleteLogo'])->name('settings.delete-logo');
 
     // Servicios
-    Route::resource('servicios', ServiceController::class)->except(['create', 'show', 'edit']);
+    Route::get('/servicios', [ServiceController::class, 'index'])->name('servicios.index');
+    Route::post('/servicios', [ServiceController::class, 'store'])->name('servicios.store');
+    Route::post('/servicios/{service}/update', [ServiceController::class, 'update'])->name('servicios.update');
+    Route::post('/servicios/{service}/delete', [ServiceController::class, 'destroy'])->name('servicios.delete');
 
     // Barberos
-    Route::resource('barberos', BarberController::class)->except(['create', 'show', 'edit']);
+    Route::get('/barberos', [BarberController::class, 'index'])->name('barberos.index');
+    Route::post('/barberos', [BarberController::class, 'store'])->name('barberos.store');
+    Route::post('/barberos/{barber}/update', [BarberController::class, 'update'])->name('barberos.update');
+    Route::post('/barberos/{barber}/delete', [BarberController::class, 'destroy'])->name('barberos.delete');
 
     // Clientes
-    Route::resource('clientes', ClientController::class)->except(['create', 'show', 'edit']);
+    Route::get('/clientes', [ClientController::class, 'index'])->name('clientes.index');
+    Route::post('/clientes', [ClientController::class, 'store'])->name('clientes.store');
+    Route::post('/clientes/{client}/update', [ClientController::class, 'update'])->name('clientes.update');
+    Route::post('/clientes/{client}/delete', [ClientController::class, 'destroy'])->name('clientes.delete');
 
     // Inventario (Productos)
-    Route::resource('productos', ProductController::class)->except(['create', 'show', 'edit']);
+    Route::get('/productos', [ProductController::class, 'index'])->name('productos.index');
+    Route::post('/productos', [ProductController::class, 'store'])->name('productos.store');
+    Route::post('/productos/{product}/update', [ProductController::class, 'update'])->name('productos.update');
+    Route::post('/productos/{product}/delete', [ProductController::class, 'destroy'])->name('productos.delete');
+
+    // Categorías de Productos
+    Route::post('/categorias', [CategoryController::class, 'store'])->name('categorias.store');
+    Route::post('/categorias/{category}/delete', [CategoryController::class, 'destroy'])->name('categorias.destroy');
 
     // Citas
     Route::get('/citas/agendar', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::get('/citas', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/citas', [AppointmentController::class, 'store'])->name('appointments.store');
-    Route::put('/citas/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
-    Route::put('/citas/{appointment}/estado', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
+    Route::post('/citas/{appointment}/update', [AppointmentController::class, 'update'])->name('appointments.update');
+    Route::post('/citas/{appointment}/estado', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
     Route::post('/citas/{appointment}/pagar', [AppointmentController::class, 'pay'])->name('appointments.pay');
-    Route::delete('/citas/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
+    Route::post('/citas/{appointment}/delete', [AppointmentController::class, 'destroy'])->name('appointments.delete');
 
     // Finanzas
     Route::get('/finanzas/ventas', [CashController::class, 'indexVentas'])->name('cash.ventas');
@@ -88,10 +108,10 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
     Route::get('/finanzas/pagos', [CashController::class, 'indexPagos'])->name('cash.pagos');
     Route::get('/finanzas/cierre', [CashController::class, 'indexCierre'])->name('cash.cierre');
 
-    // Acciones
+    // Acciones de Caja
     Route::post('/finanzas/ingreso', [CashController::class, 'storeIngreso'])->name('cash.store-ingreso');
     Route::post('/finanzas/gasto', [CashController::class, 'storeGasto'])->name('cash.store-gasto');
-    Route::delete('/finanzas/{transaction}', [CashController::class, 'destroy'])->name('cash.destroy');
+    Route::post('/finanzas/{transaction}/delete', [CashController::class, 'destroy'])->name('cash.delete');
 
     // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
