@@ -6,6 +6,7 @@ use App\Http\Controllers\SuperAdmin\BarbershopController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\App\BarbershopSettingsController;
 use App\Http\Controllers\App\ServiceController;
+use App\Http\Controllers\App\ClientController;
 use App\Http\Controllers\App\BarberController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,6 +62,9 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
 
     // Barberos
     Route::resource('barberos', BarberController::class)->except(['create', 'show', 'edit']);
+
+    // Clientes
+    Route::resource('clientes', ClientController::class)->except(['create', 'show', 'edit']);
 
     // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
