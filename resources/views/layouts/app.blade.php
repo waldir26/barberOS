@@ -42,8 +42,8 @@
                 <i data-lucide="layout-dashboard" class="w-5 h-5 {{ request()->routeIs('app.dashboard') ? 'text-barber-accent' : '' }}"></i>
                 Dashboard
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
-                <i data-lucide="calendar" class="w-5 h-5"></i>
+            <a href="{{ route('app.appointments.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.appointments.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="calendar" class="w-5 h-5 {{ request()->routeIs('app.appointments.*') ? 'text-barber-accent' : '' }}"></i>
                 Agenda y Citas
             </a>
             <a href="{{ route('app.clientes.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.clientes.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">

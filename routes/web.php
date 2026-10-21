@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\App\BarbershopSettingsController;
 use App\Http\Controllers\App\ServiceController;
 use App\Http\Controllers\App\ClientController;
+use App\Http\Controllers\App\AppointmentController;
 use App\Http\Controllers\App\BarberController;
 use Illuminate\Support\Facades\Route;
 
@@ -65,6 +66,12 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
 
     // Clientes
     Route::resource('clientes', ClientController::class)->except(['create', 'show', 'edit']);
+
+    // Citas
+    Route::get('/citas', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/citas', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::put('/citas/{appointment}/estado', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
+    Route::delete('/citas/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
     // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
