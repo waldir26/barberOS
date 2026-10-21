@@ -9,6 +9,7 @@ use App\Http\Controllers\App\ServiceController;
 use App\Http\Controllers\App\ClientController;
 use App\Http\Controllers\App\AppointmentController;
 use App\Http\Controllers\App\BarberController;
+use App\Http\Controllers\App\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la raíz al login
@@ -49,7 +50,9 @@ Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmi
 
 // Panel de Barbería
 Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(function () {
-    Route::get('/dashboard', fn() => view('app.dashboard'))->name('dashboard');
+
+    // Dashboard (Ruta actualizada para usar el controlador)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Configuración de la Barbería
     Route::get('/configuracion', [BarbershopSettingsController::class, 'edit'])->name('settings.edit');
