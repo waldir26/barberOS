@@ -4,7 +4,7 @@
 
 @section('content')
 <div x-data="{ 
-    openModal: {{ $errors->any() && !request()->isMethod('PUT') ? 'true' : 'false' }}, 
+    openModal: {{ $errors->any() && !request()->isMethod('POST') ? 'true' : 'false' }}, 
     editModal: false,
     editAction: '',
     editNombre: '',
@@ -62,18 +62,20 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2">
+                                <!-- Botón Editar -->
                                 <button x-on:click="
                                     editModal = true; 
-                                    editAction = '{{ route('app.barberos.update', $barber) }}';
+                                    editAction = '{{ route('app.barberos.update', $barber->id) }}';
                                     editNombre = '{{ addslashes($barber->nombre) }}';
                                     editTelefono = '{{ $barber->telefono }}';
                                 " class="p-2 text-slate-400 hover:text-barber-accent transition-colors" title="Editar">
                                     <i data-lucide="edit" class="w-4 h-4"></i>
                                 </button>
 
+                                <!-- Botón Eliminar -->
                                 <button type="button" x-on:click="
                                     deleteModal = true;
-                                    deleteAction = '{{ route('app.barberos.destroy', $barber) }}';
+                                    deleteAction = '{{ route('app.barberos.delete', $barber->id) }}';
                                 " class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
@@ -101,7 +103,7 @@
 
     <!-- MODAL DE CREACIÓN -->
     <div x-show="openModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div x-show="openModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="openModal = false"></div>
+        <div x-show="openModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"></div>
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div x-show="openModal"
@@ -123,7 +125,7 @@
                     </div>
 
                     <div class="px-6 py-4 space-y-4">
-                        @if ($errors->any() && !request()->isMethod('PUT'))
+                        @if ($errors->any() && !request()->isMethod('POST'))
                         <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
@@ -164,7 +166,7 @@
 
     <!-- MODAL DE EDICIÓN -->
     <div x-show="editModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div x-show="editModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="editModal = false"></div>
+        <div x-show="editModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"></div>
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div x-show="editModal"
@@ -178,7 +180,6 @@
 
                 <form :action="editAction" method="POST" enctype="multipart/form-data" autocomplete="off">
                     @csrf
-                    @method('PUT')
                     <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Editar Barbero</h3>
                         <button type="button" x-on:click="editModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -187,7 +188,7 @@
                     </div>
 
                     <div class="px-6 py-4 space-y-4">
-                        @if ($errors->any() && request()->isMethod('PUT'))
+                        @if ($errors->any())
                         <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
@@ -228,7 +229,7 @@
 
     <!-- MODAL DE ELIMINAR -->
     <div x-show="deleteModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div x-show="deleteModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" x-on:click="deleteModal = false"></div>
+        <div x-show="deleteModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"></div>
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div x-show="deleteModal"
@@ -242,8 +243,6 @@
 
                 <form :action="deleteAction" method="POST">
                     @csrf
-                    @method('DELETE')
-
                     <div class="p-6">
                         <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-500/20 rounded-full mb-4">
                             <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600 dark:text-red-400"></i>

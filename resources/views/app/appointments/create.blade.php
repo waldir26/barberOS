@@ -9,21 +9,42 @@
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Selecciona el cliente, el servicio y el barbero.</p>
     </div>
 
-    <!-- AVISO PARA CLIENTES NUEVOS -->
-    <div class="mb-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 flex items-start gap-3 transition-colors duration-300">
-        <div class="p-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 mt-0.5">
-            <i data-lucide="info" class="w-5 h-5"></i>
+    <!-- AVISO PARA CLIENTES NUEVOS (CON BOTÓN DE CERRAR) -->
+    <div x-data="{ showInfo: true }" class="mb-6">
+
+        <!-- Aviso visible -->
+        <div x-show="showInfo" x-transition class="rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 flex items-start gap-3 transition-colors duration-300 relative">
+            <div class="p-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 mt-0.5">
+                <i data-lucide="info" class="w-5 h-5"></i>
+            </div>
+            <div class="pr-6">
+                <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                    ¿El cliente es nuevo?
+                </p>
+                <p class="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                    Si no aparece en la lista, primero debes registrarlo en la sección de
+                    <a href="{{ route('app.clientes.index') }}" class="font-bold underline hover:text-blue-800 dark:hover:text-white transition-colors">Clientes</a>
+                    para poder agendarle una cita. Recuerda que también debes tener creados a los
+                    <a href="{{ route('app.barberos.index') }}" class="font-bold underline hover:text-blue-800 dark:hover:text-white transition-colors">Barberos</a>
+                    y los
+                    <a href="{{ route('app.servicios.index') }}" class="font-bold underline hover:text-blue-800 dark:hover:text-white transition-colors">Servicios</a>.
+                </p>
+            </div>
+
+            <!-- Botón X para cerrar -->
+            <button x-on:click="showInfo = false" class="absolute top-4 right-4 text-blue-400 hover:text-blue-600 dark:hover:text-blue-200">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
         </div>
-        <div>
-            <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                ¿El cliente es nuevo?
-            </p>
-            <p class="text-sm text-blue-600 dark:text-blue-300 mt-1">
-                Si no aparece en la lista, primero debes registrarlo en la sección de
-                <a href="{{ route('app.clientes.index') }}" class="font-bold underline hover:text-blue-800 dark:hover:text-white transition-colors">Clientes</a>
-                para poder agendarle una cita.
-            </p>
+
+        <!-- Botón para volver a mostrar el aviso si se cierra -->
+        <div x-show="!showInfo" style="display: none;">
+            <button x-on:click="showInfo = true" class="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1">
+                <i data-lucide="help-circle" class="w-4 h-4"></i>
+                ¿Necesitas ayuda para agendar?
+            </button>
         </div>
+
     </div>
 
     <div class="bg-white dark:bg-barber-card-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 p-6">
