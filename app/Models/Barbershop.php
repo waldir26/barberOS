@@ -50,4 +50,14 @@ class Barbershop extends Model
     {
         return $this->hasMany(Client::class);
     }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

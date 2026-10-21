@@ -10,6 +10,8 @@ use App\Http\Controllers\App\ClientController;
 use App\Http\Controllers\App\AppointmentController;
 use App\Http\Controllers\App\BarberController;
 use App\Http\Controllers\App\DashboardController;
+use App\Http\Controllers\App\CashController;
+use App\Http\Controllers\App\ProductController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la raíz al login
@@ -51,14 +53,12 @@ Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmi
 // Panel de Barbería
 Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(function () {
 
-    // Dashboard (Ruta actualizada para usar el controlador)
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Configuración de la Barbería
     Route::get('/configuracion', [BarbershopSettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/configuracion', [BarbershopSettingsController::class, 'update'])->name('settings.update');
-
-    // Eliminar logo
     Route::delete('/configuracion/logo', [BarbershopSettingsController::class, 'deleteLogo'])->name('settings.delete-logo');
 
     // Servicios
@@ -70,11 +70,28 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
     // Clientes
     Route::resource('clientes', ClientController::class)->except(['create', 'show', 'edit']);
 
+    // Inventario (Productos)
+    Route::resource('productos', ProductController::class)->except(['create', 'show', 'edit']);
+
     // Citas
+    Route::get('/citas/agendar', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::get('/citas', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/citas', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::put('/citas/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
     Route::put('/citas/{appointment}/estado', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
+    Route::post('/citas/{appointment}/pagar', [AppointmentController::class, 'pay'])->name('appointments.pay');
     Route::delete('/citas/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
+
+    // Finanzas
+    Route::get('/finanzas/ventas', [CashController::class, 'indexVentas'])->name('cash.ventas');
+    Route::get('/finanzas/gastos', [CashController::class, 'indexGastos'])->name('cash.gastos');
+    Route::get('/finanzas/pagos', [CashController::class, 'indexPagos'])->name('cash.pagos');
+    Route::get('/finanzas/cierre', [CashController::class, 'indexCierre'])->name('cash.cierre');
+
+    // Acciones
+    Route::post('/finanzas/ingreso', [CashController::class, 'storeIngreso'])->name('cash.store-ingreso');
+    Route::post('/finanzas/gasto', [CashController::class, 'storeGasto'])->name('cash.store-gasto');
+    Route::delete('/finanzas/{transaction}', [CashController::class, 'destroy'])->name('cash.destroy');
 
     // Perfil
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');

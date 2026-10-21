@@ -15,15 +15,34 @@
     deleteAction: ''
 }">
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
             <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Clientes</h2>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Gestiona el directorio de clientes de tu barbería.</p>
         </div>
-        <button x-on:click="openModal = true" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-sm">
+        <button x-on:click="openModal = true" class="w-full sm:w-auto bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm shrink-0">
             <i data-lucide="plus" class="w-5 h-5"></i>
             Nuevo Cliente
         </button>
+    </div>
+
+    <!-- FILTRO DE BÚSQUEDA -->
+    <div class="bg-white dark:bg-barber-card-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 p-4 mb-6">
+        <form action="{{ route('app.clientes.index') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1 w-full">
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Buscar por nombre o teléfono</label>
+                <div class="relative">
+                    <i data-lucide="search" class="w-5 h-5 absolute left-3 top-2.5 text-slate-400"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Ej. Juan Pérez..." class="w-full pl-10 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                </div>
+            </div>
+            <button type="submit" class="w-full md:w-auto bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-medium py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2">
+                <i data-lucide="search" class="w-4 h-4"></i> Buscar
+            </button>
+            @if(request('search'))
+            <a href="{{ route('app.clientes.index') }}" class="w-full md:w-auto text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white py-2 px-4 text-center">Limpiar</a>
+            @endif
+        </form>
     </div>
 
     <div class="bg-white dark:bg-barber-card-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 overflow-hidden">
@@ -88,7 +107,7 @@
                     <tr>
                         <td colspan="4" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                             <i data-lucide="users" class="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-600"></i>
-                            <p>No hay clientes registrados todavía.</p>
+                            <p>No hay clientes registrados {{ request('search') ? 'con ese criterio de búsqueda' : 'todavía' }}.</p>
                         </td>
                     </tr>
                     @endforelse

@@ -38,18 +38,31 @@
             <div class="pb-2">
                 <p class="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Operación</p>
             </div>
+
+            <!-- Dashboard -->
             <a href="{{ route('app.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.dashboard') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
                 <i data-lucide="layout-dashboard" class="w-5 h-5 {{ request()->routeIs('app.dashboard') ? 'text-barber-accent' : '' }}"></i>
                 Dashboard
             </a>
-            <a href="{{ route('app.appointments.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.appointments.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
-                <i data-lucide="calendar" class="w-5 h-5 {{ request()->routeIs('app.appointments.*') ? 'text-barber-accent' : '' }}"></i>
-                Agenda y Citas
+
+            <!-- Agendar Cita -->
+            <a href="{{ route('app.appointments.create') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.appointments.create') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="calendar-plus" class="w-5 h-5 {{ request()->routeIs('app.appointments.create') ? 'text-barber-accent' : '' }}"></i>
+                Agendar Cita
             </a>
+
+            <!-- Ver Citas -->
+            <a href="{{ route('app.appointments.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.appointments.index') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="list" class="w-5 h-5 {{ request()->routeIs('app.appointments.index') ? 'text-barber-accent' : '' }}"></i>
+                Citas
+            </a>
+
+            <!-- Clientes -->
             <a href="{{ route('app.clientes.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.clientes.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
                 <i data-lucide="users" class="w-5 h-5 {{ request()->routeIs('app.clientes.*') ? 'text-barber-accent' : '' }}"></i>
                 Clientes
             </a>
+
             <div class="pt-4 pb-2">
                 <p class="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Administración</p>
             </div>
@@ -60,25 +73,57 @@
                 Servicios
             </a>
 
+            <!-- Barberos -->
             <a href="{{ route('app.barberos.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.barberos.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
                 <i data-lucide="user-square" class="w-5 h-5 {{ request()->routeIs('app.barberos.*') ? 'text-barber-accent' : '' }}"></i>
                 Barberos
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
-                <i data-lucide="package" class="w-5 h-5"></i>
+
+            <!-- Inventario -->
+            <a href="{{ route('app.productos.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.productos.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="package" class="w-5 h-5 {{ request()->routeIs('app.productos.*') ? 'text-barber-accent' : '' }}"></i>
                 Inventario
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white">
-                <i data-lucide="wallet" class="w-5 h-5"></i>
-                Caja y Pagos
+
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Finanzas</p>
+            </div>
+
+            <!-- Ventas de Productos -->
+            <a href="{{ route('app.cash.ventas') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.ventas') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="shopping-bag" class="w-5 h-5 {{ request()->routeIs('app.cash.ventas') ? 'text-green-500' : '' }}"></i>
+                Ventas de Productos
             </a>
+
+            <!-- Gastos -->
+            <a href="{{ route('app.cash.gastos') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.gastos') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="receipt" class="w-5 h-5 {{ request()->routeIs('app.cash.gastos') ? 'text-red-500' : '' }}"></i>
+                Gastos
+            </a>
+
+            <!-- Pagos a Barberos -->
+            <a href="{{ route('app.cash.pagos') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.pagos') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="user-check" class="w-5 h-5 {{ request()->routeIs('app.cash.pagos') ? 'text-amber-500' : '' }}"></i>
+                Pagos a Barberos
+            </a>
+
+            <!-- Cierre de Caja -->
+            <a href="{{ route('app.cash.cierre') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.cash.cierre') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 {{ request()->routeIs('app.cash.cierre') ? 'text-blue-500' : '' }}"></i>
+                Cierre de Caja
+            </a>
+
             <div class="pt-4 pb-2">
                 <p class="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Sistema</p>
             </div>
+
+            <!-- Configuración -->
             <a href="{{ route('app.settings.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.settings.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
                 <i data-lucide="settings" class="w-5 h-5 {{ request()->routeIs('app.settings.*') ? 'text-barber-accent' : '' }}"></i>
                 Configuración
             </a>
+
+            <!-- Mi Perfil -->
             <a href="{{ route('app.profile.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium {{ request()->routeIs('app.profile.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-white' }}">
                 <i data-lucide="user" class="w-5 h-5 {{ request()->routeIs('app.profile.*') ? 'text-barber-accent' : '' }}"></i>
                 Mi Perfil

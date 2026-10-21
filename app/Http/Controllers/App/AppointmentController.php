@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Client;
 use App\Models\Barber;
 use App\Models\Service;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -14,20 +15,38 @@ class AppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        // Por defecto mostramos las citas de hoy, o las de la fecha que se elija
         $fecha = $request->get('fecha', Carbon::today()->toDateString());
+        $search = $request->get('search');
 
-        $appointments = Appointment::with(['client', 'barber', 'service'])
-            ->whereDate('fecha_hora', $fecha)
-            ->orderBy('fecha_hora', 'asc')
-            ->get();
+        $query = Appointment::with(['client', 'barber', 'service'])
+            ->whereDate('fecha_hora', $fecha);
 
-        // Datos para el modal de crear cita
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('client', function ($qClient) use ($search) {
+                    $qClient->where('nombre', 'like', "%{$search}%");
+                })->orWhereHas('barber', function ($qBarber) use ($search) {
+                    $qBarber->where('nombre', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $appointments = $query->orderBy('fecha_hora', 'asc')->get();
+
+        // Datos para el modal de edición
+        $barbers = Barber::where('activo', true)->orderBy('nombre')->get();
+        $services = Service::where('activo', true)->orderBy('nombre')->get();
+
+        return view('app.appointments.index', compact('appointments', 'fecha', 'search', 'barbers', 'services'));
+    }
+
+    public function create()
+    {
         $clients = Client::orderBy('nombre')->get();
         $barbers = Barber::where('activo', true)->orderBy('nombre')->get();
         $services = Service::where('activo', true)->orderBy('nombre')->get();
 
-        return view('app.appointments.index', compact('appointments', 'fecha', 'clients', 'barbers', 'services'));
+        return view('app.appointments.create', compact('clients', 'barbers', 'services'));
     }
 
     public function store(Request $request)
@@ -54,8 +73,6 @@ class AppointmentController extends Controller
                 ->get()
                 ->contains(function ($citaExistente) use ($fechaHora, $nuevaCitaFin) {
                     $citaExistenteFin = $citaExistente->fecha_hora->copy()->addMinutes($citaExistente->service->duracion ?? 0);
-
-                    // Verificamos si se cruzan las horas
                     return ($fechaHora < $citaExistenteFin) && ($nuevaCitaFin > $citaExistente->fecha_hora);
                 });
 
@@ -73,7 +90,45 @@ class AppointmentController extends Controller
             'notas' => $validated['notas'],
         ]);
 
-        return redirect()->back()->with('success', 'Cita agendada exitosamente.');
+        return redirect()->route('app.appointments.index')->with('success', 'Cita agendada exitosamente.');
+    }
+
+    public function update(Request $request, Appointment $appointment)
+    {
+        $validated = $request->validate([
+            'barber_id' => ['required', 'exists:barbers,id'],
+            'service_id' => ['required', 'exists:services,id'],
+            'fecha' => ['required', 'date'],
+            'hora' => ['required', 'date_format:H:i'],
+            'notas' => ['nullable', 'string'],
+        ]);
+
+        $fechaHora = Carbon::parse($validated['fecha'] . ' ' . $validated['hora']);
+
+        $appointment->update([
+            'barber_id' => $validated['barber_id'],
+            'service_id' => $validated['service_id'],
+            'fecha_hora' => $fechaHora,
+            'notas' => $validated['notas'],
+        ]);
+
+        return redirect()->back()->with('success', 'Cita actualizada correctamente.');
+    }
+
+    public function pay(Appointment $appointment)
+    {
+        // Registrar el ingreso en la caja
+        Transaction::create([
+            'tipo' => 'ingreso_servicio',
+            'descripcion' => 'Cobro: ' . $appointment->service->nombre . ' (' . $appointment->client->nombre . ')',
+            'monto' => $appointment->service->precio,
+            'appointment_id' => $appointment->id,
+        ]);
+
+        // Marcar la cita como completada
+        $appointment->update(['estado' => 'completada']);
+
+        return redirect()->back()->with('success', 'Pago registrado exitosamente y cita completada.');
     }
 
     public function updateStatus(Request $request, Appointment $appointment)
