@@ -18,7 +18,10 @@ class AppointmentController extends Controller
         $fecha = $request->get('fecha', Carbon::today()->toDateString());
         $search = $request->get('search');
 
+        // Filtramos para que solo traiga citas donde el cliente y el servicio existan
         $query = Appointment::with(['client', 'barber', 'service'])
+            ->whereHas('client')
+            ->whereHas('service')
             ->whereDate('fecha_hora', $fecha);
 
         if ($search) {
@@ -61,24 +64,15 @@ class AppointmentController extends Controller
         ]);
 
         $fechaHora = Carbon::parse($validated['fecha'] . ' ' . $validated['hora']);
-        $service = Service::findOrFail($validated['service_id']);
 
-        // Validación de choque de horarios (si el servicio tiene duración)
-        if ($service->duracion) {
-            $nuevaCitaFin = $fechaHora->copy()->addMinutes($service->duracion);
+        // Validación: El barbero no puede tener 2 citas a la misma hora exacta
+        $choque = Appointment::where('barber_id', $validated['barber_id'])
+            ->where('fecha_hora', $fechaHora)
+            ->where('estado', '!=', 'cancelada')
+            ->exists();
 
-            $choque = Appointment::where('barber_id', $validated['barber_id'])
-                ->whereDate('fecha_hora', $validated['fecha'])
-                ->where('estado', '!=', 'cancelada')
-                ->get()
-                ->contains(function ($citaExistente) use ($fechaHora, $nuevaCitaFin) {
-                    $citaExistenteFin = $citaExistente->fecha_hora->copy()->addMinutes($citaExistente->service->duracion ?? 0);
-                    return ($fechaHora < $citaExistenteFin) && ($nuevaCitaFin > $citaExistente->fecha_hora);
-                });
-
-            if ($choque) {
-                return back()->withInput()->withErrors(['hora' => 'El barbero ya tiene una cita en ese horario. Por favor, elige otra hora.']);
-            }
+        if ($choque) {
+            return back()->withInput()->withErrors(['hora' => 'El barbero ya tiene una cita agendada exactamente a esta hora. Por favor, elige otra hora.']);
         }
 
         Appointment::create([
@@ -90,7 +84,8 @@ class AppointmentController extends Controller
             'notas' => $validated['notas'],
         ]);
 
-        return redirect()->route('app.appointments.index')->with('success', 'Cita agendada exitosamente.');
+        return redirect()->route('app.appointments.index', ['fecha' => $validated['fecha']])
+            ->with('success', 'Cita agendada exitosamente.');
     }
 
     public function update(Request $request, Appointment $appointment)
@@ -104,6 +99,17 @@ class AppointmentController extends Controller
         ]);
 
         $fechaHora = Carbon::parse($validated['fecha'] . ' ' . $validated['hora']);
+
+        // Validación estricta al editar (ignorando la cita actual)
+        $choque = Appointment::where('barber_id', $validated['barber_id'])
+            ->where('fecha_hora', $fechaHora)
+            ->where('estado', '!=', 'cancelada')
+            ->where('id', '!=', $appointment->id)
+            ->exists();
+
+        if ($choque) {
+            return back()->withInput()->withErrors(['hora' => 'El barbero ya tiene otra cita agendada a esta misma hora.']);
+        }
 
         $appointment->update([
             'barber_id' => $validated['barber_id'],
@@ -147,5 +153,86 @@ class AppointmentController extends Controller
         $appointment->delete();
 
         return redirect()->back()->with('success', 'Cita eliminada.');
+    }
+
+    public function calendar()
+    {
+        return view('app.appointments.calendar');
+    }
+
+    public function calendarData()
+    {
+        $appointments = Appointment::with(['client', 'barber', 'service'])->get();
+
+        // Paleta de colores para los barberos
+        $coloresBarberos = [
+            '#3B82F6', // Azul
+            '#10B981', // Verde Esmeralda
+            '#8B5CF6', // Morado
+            '#F59E0B', // Naranja
+            '#EF4444', // Rojo
+            '#06B6D4', // Cyan
+            '#EC4899', // Rosa
+            '#14B8A6', // Teal
+        ];
+
+        $events = $appointments->map(function ($cita) use ($coloresBarberos) {
+            // Color fijo según el barbero
+            $colorIndex = $cita->barber_id % count($coloresBarberos);
+            $color = $coloresBarberos[$colorIndex];
+
+            // Si está cancelada, la pintamos de gris
+            if ($cita->estado === 'cancelada') {
+                $color = '#94A3B8';
+            }
+
+            return [
+                'id' => $cita->id,
+                // Agregamos la hora al título para mejor lectura
+                'title' => $cita->fecha_hora->format('h:i A') . ' - ' . $cita->client->nombre,
+                'start' => $cita->fecha_hora->toIso8601String(),
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'extendedProps' => [
+                    'cliente' => $cita->client->nombre,
+                    'servicio' => $cita->service->nombre,
+                    'precio' => number_format($cita->service->precio, 2),
+                    'barbero' => $cita->barber->nombre,
+                    'estado' => ucfirst($cita->estado),
+                    'notas' => $cita->notas ?? 'Sin notas',
+                    'hora' => $cita->fecha_hora->format('h:i A'),
+                    'fecha' => $cita->fecha_hora->format('d/m/Y'),
+                ]
+            ];
+        });
+
+        return response()->json($events);
+    }
+
+    public function checkAvailability(Request $request)
+    {
+        $fecha = $request->get('fecha');
+        $hora = $request->get('hora');
+        $barber_id = $request->get('barber_id');
+
+        if (!$fecha || !$hora || !$barber_id) {
+            return response()->json(['disponible' => true]);
+        }
+
+        $fechaHora = Carbon::parse($fecha . ' ' . $hora);
+
+        $ocupado = Appointment::where('barber_id', $barber_id)
+            ->where('fecha_hora', $fechaHora)
+            ->where('estado', '!=', 'cancelada')
+            ->first();
+
+        if ($ocupado) {
+            return response()->json([
+                'disponible' => false,
+                'cliente' => $ocupado->client->nombre
+            ]);
+        }
+
+        return response()->json(['disponible' => true]);
     }
 }

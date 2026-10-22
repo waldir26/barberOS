@@ -64,6 +64,9 @@
             }">
             @csrf
 
+            <!-- RUTA OCULTA PARA QUE EL JS HAGA LA CONSULTA -->
+            <input type="hidden" id="check-route" value="{{ route('app.appointments.check') }}">
+
             @if ($errors->any())
             <div class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm">
                 <ul class="list-disc list-inside">
@@ -119,8 +122,8 @@
                 <!-- Barbero -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Barbero *</label>
-                    <select name="barber_id" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
-                        <option value="">Seleccione</option>
+                    <select name="barber_id" id="barber_id" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                        <option value="" disabled selected hidden>— Seleccione un barbero —</option>
                         @foreach($barbers as $barber)
                         <option value="{{ $barber->id }}" {{ old('barber_id') == $barber->id ? 'selected' : '' }}>{{ $barber->nombre }}</option>
                         @endforeach
@@ -131,7 +134,7 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Servicio *</label>
                     <select name="service_id" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
-                        <option value="">Seleccione</option>
+                        <option value="" disabled selected hidden>— Seleccione un servicio —</option>
                         @foreach($services as $service)
                         <option value="{{ $service->id }}" {{ old('service_id') == $service->id ? 'selected' : '' }}>
                             {{ $service->nombre }} (${{ $service->precio }})
@@ -140,16 +143,21 @@
                     </select>
                 </div>
 
-                <!-- Fecha -->
+                <!-- Fecha (Flatpickr) -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha *</label>
-                    <input type="date" name="fecha" value="{{ old('fecha', date('Y-m-d')) }}" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                    <input type="text" name="fecha" id="fecha-cita" value="{{ old('fecha', date('Y-m-d')) }}" required placeholder="Seleccione fecha" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                 </div>
 
-                <!-- Hora -->
+                <!-- Hora (Flatpickr) -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Hora *</label>
-                    <input type="time" name="hora" value="{{ old('hora') }}" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                    <input type="text" name="hora" id="hora-cita" value="{{ old('hora') }}" required placeholder="--:--" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+
+                    <!-- CARTEL DE DISPONIBILIDAD -->
+                    <div id="availability-alert" class="mt-2 text-sm font-medium hidden">
+                        <!-- Se llena con JS -->
+                    </div>
                 </div>
 
                 <!-- Notas -->
@@ -161,7 +169,7 @@
 
             <div class="mt-8 flex justify-end gap-3">
                 <a href="{{ route('app.appointments.index') }}" class="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancelar</a>
-                <button type="submit" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2.5 px-6 rounded-xl transition-all shadow-sm flex items-center gap-2">
+                <button type="submit" id="btn-submit" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2.5 px-6 rounded-xl transition-all shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="calendar-check" class="w-4 h-4"></i>
                     Agendar Cita
                 </button>

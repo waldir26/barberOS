@@ -20,6 +20,21 @@
         </button>
     </div>
 
+    <!-- CARTEL DE ERRORES (FUERA DEL MODAL) -->
+    @if ($errors->any())
+    <div class="mb-6 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 text-sm flex items-start gap-2">
+        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+        <div>
+            <p class="font-bold mb-1">No se pudo procesar la venta:</p>
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+    @endif
+
     <!-- Tarjeta de Total -->
     <div class="bg-white dark:bg-barber-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-700/50 shadow-sm mb-6">
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total en ventas hoy</p>
@@ -128,16 +143,6 @@
                     </div>
 
                     <div class="px-6 py-4 space-y-4">
-                        @if ($errors->any())
-                        <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 text-sm text-left">
-                            <ul class="list-disc list-inside">
-                                @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        @endif
-
                         <!-- Buscador -->
                         <div class="relative">
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Agregar Producto</label>

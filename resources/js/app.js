@@ -1,5 +1,6 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import './appointments.js';
 
 window.Alpine = Alpine;
 Alpine.start();

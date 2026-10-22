@@ -4,7 +4,7 @@
 
 @section('content')
 <div x-data="{ 
-    pagoModal: false, 
+    pagoModal: {{ $errors->any() ? 'true' : 'false' }}, 
     deleteModal: false,
     deleteAction: ''
 }">
@@ -20,9 +20,59 @@
         </button>
     </div>
 
+    <!-- CARTEL DE ERRORES -->
+    @if ($errors->any())
+    <div class="mb-6 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 text-sm flex items-start gap-2">
+        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+        <div>
+            <p class="font-bold mb-1">No se pudo procesar el pago:</p>
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+    @endif
+
+    <!-- FILTROS DE BÚSQUEDA (NUEVO) -->
+    <div class="bg-white dark:bg-barber-card-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 p-4 mb-6">
+        <form action="{{ route('app.cash.pagos') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+
+            <!-- Fecha Inicio -->
+            <div class="w-full md:w-1/4">
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Fecha Inicio</label>
+                <input type="text" name="fecha_inicio" id="fecha_inicio" value="{{ $fechaInicio }}" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+            </div>
+
+            <!-- Fecha Fin -->
+            <div class="w-full md:w-1/4">
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Fecha Fin</label>
+                <input type="text" name="fecha_fin" id="fecha_fin" value="{{ $fechaFin }}" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+            </div>
+
+            <!-- Barbero -->
+            <div class="w-full md:w-auto flex-1">
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Barbero (Opcional)</label>
+                <select name="barber_id" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                    <option value="">Todos los barberos</option>
+                    @foreach($barbers as $barber)
+                    <option value="{{ $barber->id }}" {{ $barberId == $barber->id ? 'selected' : '' }}>{{ $barber->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="submit" class="w-full md:w-auto bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-medium py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4"></i> Filtrar
+            </button>
+
+            <a href="{{ route('app.cash.pagos') }}" class="w-full md:w-auto text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white py-2 px-4 text-center">Limpiar</a>
+        </form>
+    </div>
+
     <!-- Tarjeta de Total -->
     <div class="bg-white dark:bg-barber-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-700/50 shadow-sm mb-6">
-        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total pagado hoy</p>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total pagado en el período</p>
         <p class="text-3xl font-bold text-slate-900 dark:text-white">${{ number_format($totalPagos, 2) }}</p>
     </div>
 
@@ -31,7 +81,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm border-b border-slate-200 dark:border-slate-700/50">
-                        <th class="px-6 py-4 font-medium">Hora</th>
+                        <th class="px-6 py-4 font-medium">Fecha / Hora</th>
                         <th class="px-6 py-4 font-medium">Barbero / Concepto</th>
                         <th class="px-6 py-4 font-medium">Monto</th>
                         <th class="px-6 py-4 font-medium text-right">Acciones</th>
@@ -41,19 +91,21 @@
                     @forelse ($pagos as $pago)
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                         <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                            {{ $pago->created_at->format('h:i A') }}
+                            <div class="font-medium text-slate-900 dark:text-white">{{ $pago->created_at->format('d/m/Y') }}</div>
+                            <div>{{ $pago->created_at->format('h:i A') }}</div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="font-medium text-slate-900 dark:text-white">{{ $pago->descripcion }}</div>
                         </td>
                         <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
-                            -${{ number_format($pago->monto, 2) }}
+                            <!-- SE QUITÓ EL SIGNO NEGATIVO AQUÍ -->
+                            ${{ number_format($pago->monto, 2) }}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button type="button" x-on:click="
-                                deleteModal = true;
-                                deleteAction = '{{ route('app.cash.delete', $pago->id) }}';
-                            " class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
+                            <form id="delete-form-{{ $pago->id }}" action="{{ route('app.cash.delete', $pago->id) }}" method="POST" class="hidden">
+                                @csrf
+                            </form>
+                            <button type="button" onclick="if(confirm('¿Eliminar este pago?')) document.getElementById('delete-form-{{ $pago->id }}').submit();" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </td>
@@ -62,7 +114,7 @@
                     <tr>
                         <td colspan="4" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                             <i data-lucide="user-check" class="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-600"></i>
-                            <p>No hay pagos registrados hoy.</p>
+                            <p>No hay pagos registrados en este período.</p>
                         </td>
                     </tr>
                     @endforelse
@@ -98,18 +150,23 @@
                     <div class="px-6 py-4 space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Seleccionar Barbero *</label>
-                            <!-- AQUÍ ESTÁ EL CAMBIO: Selector en lugar de input -->
                             <select name="descripcion" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
-                                <option value="">Seleccione el barbero...</option>
+                                <option value="" disabled selected hidden>— Seleccione el barbero —</option>
                                 @foreach($barbers as $barber)
-                                <option value="Pago a {{ $barber->nombre }}">{{ $barber->nombre }}</option>
+                                <option value="Pago a {{ $barber->nombre }}" {{ old('descripcion') == 'Pago a '.$barber->nombre ? 'selected' : '' }}>{{ $barber->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
 
+                        <!-- NUEVO CAMPO: CONCEPTO -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Concepto / Nota (Opcional)</label>
+                            <input type="text" name="concepto" value="{{ old('concepto') }}" placeholder="Ej. Pago semanal, Comisión 5 cortes..." class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Monto ($) *</label>
-                            <input type="number" step="0.01" name="monto" required min="0.01" placeholder="0.00" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
+                            <input type="number" step="0.01" name="monto" value="{{ old('monto') }}" required min="0.01" placeholder="0.00" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-barber-dark text-slate-800 dark:text-slate-100 px-3 py-2 focus:ring-2 focus:ring-barber-accent">
                         </div>
                     </div>
 
@@ -117,45 +174,6 @@
                         <button type="button" x-on:click="pagoModal = false" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancelar</button>
                         <button type="submit" class="bg-barber-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i> Guardar Pago
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE ELIMINAR -->
-    <div x-show="deleteModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div x-show="deleteModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"></div>
-
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <div x-show="deleteModal"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-barber-card-dark text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-200 dark:border-slate-700/50">
-
-                <form :action="deleteAction" method="POST">
-                    @csrf
-                    <div class="p-6">
-                        <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-500/20 rounded-full mb-4">
-                            <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600 dark:text-red-400"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-center text-slate-900 dark:text-white mb-2">Eliminar Pago</h3>
-                        <p class="text-sm text-center text-slate-500 dark:text-slate-400">
-                            ¿Estás seguro de que deseas eliminar este registro de pago? El balance se actualizará.
-                        </p>
-                    </div>
-
-                    <div class="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 flex justify-center gap-3 rounded-b-2xl">
-                        <button type="button" x-on:click="deleteModal = false" class="px-5 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-xl transition-colors">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-5 rounded-xl transition-all shadow-sm">
-                            Sí, eliminar
                         </button>
                     </div>
                 </form>

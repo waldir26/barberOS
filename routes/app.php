@@ -57,7 +57,13 @@ Route::middleware(['auth', 'barbershop'])->prefix('app')->name('app.')->group(fu
     Route::post('/citas/{appointment}/update', [AppointmentController::class, 'update'])->name('appointments.update');
     Route::post('/citas/{appointment}/estado', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
     Route::post('/citas/{appointment}/pagar', [AppointmentController::class, 'pay'])->name('appointments.pay');
+    Route::post('/citas/verificar-disponibilidad', [AppointmentController::class, 'checkAvailability'])->name('appointments.check');
+
+    // RUTA DE ELIMINAR CITA (Usando el nombre 'delete')
     Route::post('/citas/{appointment}/delete', [AppointmentController::class, 'destroy'])->name('appointments.delete');
+
+    Route::get('/calendario', [AppointmentController::class, 'calendar'])->name('appointments.calendar');
+    Route::get('/calendario/data', [AppointmentController::class, 'calendarData'])->name('appointments.calendar.data');
 
     // Finanzas
     Route::get('/finanzas/ventas', [CashController::class, 'indexVentas'])->name('cash.ventas');

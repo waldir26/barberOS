@@ -4,12 +4,142 @@
 
 @theme {
     --font-sans: 'Figtree', ui-sans-serif, system-ui, sans-serif;
-
-    /* Paleta BarberOS Premium - Basada en tu imagen */
     --color-barber-light: #F8FAFC;
     --color-barber-dark: #1E2432;
-    /* Fondo general: el tono que enviaste */
     --color-barber-card-dark: #2A3241;
-    /* Tarjetas: un tono más claro para que resalten */
     --color-barber-accent: #3B82F6;
+}
+
+/* ==========================================
+   FLATPICKR - FORZANDO MODO CLARO Y OSCURO
+   ========================================== */
+
+/* 1. MODO CLARO (Por defecto) */
+.flatpickr-calendar {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+    color: #334155 !important;
+}
+
+.flatpickr-day {
+    color: #334155 !important;
+}
+
+.flatpickr-day:hover {
+    background: #f1f5f9 !important;
+}
+
+.flatpickr-day.selected {
+    background: var(--color-barber-accent) !important;
+    border-color: var(--color-barber-accent) !important;
+    color: #ffffff !important;
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-weekdays,
+.flatpickr-weekday {
+    color: #64748b !important;
+    fill: #64748b !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: #ffffff !important;
+    color: #334155 !important;
+}
+
+/* 2. MODO OSCURO */
+.dark .flatpickr-calendar {
+    background: var(--color-barber-card-dark) !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5) !important;
+    color: #cbd5e1 !important;
+}
+
+.dark .flatpickr-day {
+    color: #cbd5e1 !important;
+}
+
+.dark .flatpickr-day:hover {
+    background: #334155 !important;
+}
+
+.dark .flatpickr-day.selected {
+    background: var(--color-barber-accent) !important;
+    border-color: var(--color-barber-accent) !important;
+    color: #ffffff !important;
+}
+
+.dark .flatpickr-months .flatpickr-month,
+.dark .flatpickr-weekdays,
+.dark .flatpickr-weekday {
+    color: #f8fafc !important;
+    fill: #f8fafc !important;
+}
+
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: var(--color-barber-card-dark) !important;
+    color: #f8fafc !important;
+}
+
+/* ==========================================
+   ARREGLO DEFINITIVO PARA EL RELOJ (MODO OSCURO)
+   ========================================== */
+
+/* Fondo del contenedor de la hora */
+.dark .flatpickr-time {
+    background-color: var(--color-barber-card-dark) !important;
+    border-top: 1px solid #334155 !important;
+}
+
+/* Forzar transparencia en el contenedor de los números (Quita el bloque azul gigante) */
+.dark .flatpickr-time .numInputWrapper,
+.dark .flatpickr-time .numInputWrapper:focus,
+.dark .flatpickr-time .numInputWrapper:focus-within,
+.dark .flatpickr-time .numInputWrapper:hover {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Los números de la hora y los minutos */
+.dark .flatpickr-time input {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+    box-shadow: none !important;
+}
+
+/* SOLO cuando haces clic en el número, se pinta el fondo azul en ese input */
+.dark .flatpickr-time input:focus,
+.dark .flatpickr-time input:active {
+    background-color: #3B82F6 !important;
+    color: #ffffff !important;
+    border-radius: 0.375rem;
+}
+
+/* El botón AM/PM */
+.dark .flatpickr-time .flatpickr-am-pm {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+}
+
+.dark .flatpickr-time .flatpickr-am-pm:hover {
+    background-color: #334155 !important;
+}
+
+/* Las flechitas de subir y bajar */
+.dark .flatpickr-time .numInputWrapper span {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark .flatpickr-time .numInputWrapper span:hover {
+    background-color: #334155 !important;
+}
+
+.dark .flatpickr-time .numInputWrapper span.arrowUp:after {
+    border-bottom-color: #cbd5e1 !important;
+}
+
+.dark .flatpickr-time .numInputWrapper span.arrowDown:after {
+    border-top-color: #cbd5e1 !important;
 }

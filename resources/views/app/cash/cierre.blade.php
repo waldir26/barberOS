@@ -65,12 +65,20 @@
 
     <!-- Balance Final -->
     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-8 text-center shadow-sm">
-        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Balance Final del Día</p>
-        <p class="text-5xl font-extrabold {{ $balanceFinal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-            ${{ number_format($balanceFinal, 2) }}
+        <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Balance del Día</p>
+
+        <p class="text-5xl font-extrabold {{ $balanceFinal < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }} mb-3">
+            {{ $balanceFinal < 0 ? '-$' . number_format(abs($balanceFinal), 2) : '$' . number_format($balanceFinal, 2) }}
         </p>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-3">
-            Este es el efectivo total que debería haber en la caja.
+
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+            @if($balanceFinal < 0)
+                Hubo una pérdida hoy. Los egresos superaron los ingresos por ${{ number_format(abs($balanceFinal), 2) }}.
+                @elseif($balanceFinal> 0)
+                ¡Buen día! Hubo una ganancia neta de ${{ number_format($balanceFinal, 2) }}.
+                @else
+                El balance del día quedó en cero. No hubo ganancias ni pérdidas.
+                @endif
         </p>
     </div>
 </div>

@@ -46,21 +46,32 @@ class CashController extends Controller
         return view('app.cash.gastos', compact('gastos', 'totalGastos'));
     }
 
-    // 3. Vista de Pagos a Barberos
-    public function indexPagos()
+    // 3. Vista de Pagos a Barberos (CON FILTROS)
+    public function indexPagos(Request $request)
     {
-        $hoy = Carbon::today();
-        $pagos = Transaction::whereDate('created_at', $hoy)
-            ->where('tipo', 'pago_barbero')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Por defecto mostramos el día de hoy si no hay filtros
+        $fechaInicio = $request->get('fecha_inicio', Carbon::today()->toDateString());
+        $fechaFin = $request->get('fecha_fin', Carbon::today()->toDateString());
+        $barberId = $request->get('barber_id');
 
+        $query = Transaction::where('tipo', 'pago_barbero')
+            ->whereDate('created_at', '>=', $fechaInicio)
+            ->whereDate('created_at', '<=', $fechaFin);
+
+        // Filtro opcional por barbero (buscando en la descripción)
+        if ($barberId) {
+            $barber = Barber::find($barberId);
+            if ($barber) {
+                $query->where('descripcion', 'like', '%' . $barber->nombre . '%');
+            }
+        }
+
+        $pagos = $query->orderBy('created_at', 'desc')->get();
         $totalPagos = $pagos->sum('monto');
 
-        // Enviamos la lista de barberos activos
         $barbers = Barber::where('activo', true)->orderBy('nombre')->get();
 
-        return view('app.cash.pagos', compact('pagos', 'totalPagos', 'barbers'));
+        return view('app.cash.pagos', compact('pagos', 'totalPagos', 'barbers', 'fechaInicio', 'fechaFin', 'barberId'));
     }
 
     // 4. Vista de Cierre de Caja
@@ -151,11 +162,18 @@ class CashController extends Controller
             'tipo' => ['required', 'in:gasto,pago_barbero'],
             'descripcion' => ['required', 'string', 'max:255'],
             'monto' => ['required', 'numeric', 'min:0.01'],
+            'concepto' => ['nullable', 'string', 'max:255'], // Nuevo campo
         ]);
+
+        // Si es un pago a barbero, armamos la descripción con el concepto
+        $descripcionFinal = $validated['descripcion'];
+        if ($validated['tipo'] === 'pago_barbero' && !empty($validated['concepto'])) {
+            $descripcionFinal = $validated['descripcion'] . ' (' . $validated['concepto'] . ')';
+        }
 
         Transaction::create([
             'tipo' => $validated['tipo'],
-            'descripcion' => $validated['descripcion'],
+            'descripcion' => $descripcionFinal,
             'monto' => $validated['monto'],
         ]);
 

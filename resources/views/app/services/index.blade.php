@@ -10,6 +10,7 @@
     editNombre: '',
     editPrecio: '',
     editDuracion: '',
+    // Variables para el modal de eliminar
     deleteModal: false,
     deleteAction: ''
 }">
@@ -55,7 +56,8 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2">
+                            <div class="flex justify-end gap-2 items-center">
+                                <!-- Botón Editar -->
                                 <button x-on:click="
                                     editModal = true; 
                                     editAction = '{{ route('app.servicios.update', $service) }}';
@@ -66,9 +68,10 @@
                                     <i data-lucide="edit" class="w-4 h-4"></i>
                                 </button>
 
+                                <!-- Botón Eliminar (Abre el modal) -->
                                 <button type="button" x-on:click="
                                     deleteModal = true;
-                                    deleteAction = '{{ route('app.servicios.destroy', $service) }}';
+                                    deleteAction = '{{ route('app.servicios.delete', $service->id) }}';
                                 " class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
@@ -221,7 +224,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE ELIMINAR -->
+    <!-- MODAL DE ELIMINAR (ELEGANTE) -->
     <div x-show="deleteModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="deleteModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"></div>
 
@@ -237,7 +240,7 @@
 
                 <form :action="deleteAction" method="POST">
                     @csrf
-                    @method('DELETE')
+                    <!-- IMPORTANTE: No usar @method('DELETE') para evitar errores de ruta -->
 
                     <div class="p-6">
                         <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-500/20 rounded-full mb-4">
